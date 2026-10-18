@@ -25,10 +25,10 @@ const parsers = {
 
 const supabaseDir = join(process.cwd(), "supabase");
 
-function schemaSql(): string[] {
+function migrations(): { name: string; sql: string }[] {
   const dir = join(supabaseDir, "migrations");
   const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
-  return files.map((f) => readFileSync(join(dir, f), "utf8"));
+  return files.map((name) => ({ name, sql: readFileSync(join(dir, name), "utf8") }));
 }
 
 function seedSql(): string {
@@ -38,7 +38,7 @@ function seedSql(): string {
 type PGliteLike = {
   query<T>(sql: string, params?: unknown[]): Promise<{ rows: T[] }>;
   exec(sql: string): Promise<unknown>;
-  transaction<T>(fn: (tx: { query: PGliteLike["query"] }) => Promise<T>): Promise<T>;
+  transaction<T>(fn: (tx: { query: PGliteLike["query"]; exec: PGliteLike["exec"] }) => Promise<T>): Promise<T>;
   dumpDataDir(): Promise<Blob>;
 };
 
@@ -46,11 +46,18 @@ async function openPglite(dataDir: string | undefined, seed: boolean, from?: Blo
   const { PGlite } = await import("@electric-sql/pglite");
   if (dataDir) mkdirSync(dataDir, { recursive: true });
   const pg = new PGlite({ dataDir, parsers, loadDataDir: from }) as unknown as PGliteLike;
-  const existing = await pg.query<{ t: string | null }>("select to_regclass('public.jobs')::text as t");
-  if (!existing.rows[0].t) {
-    for (const sql of schemaSql()) await pg.exec(sql);
-    if (seed) await pg.exec(seedSql());
+  // Apply migrations not applied yet (a database in .data/ may predate newer ones); seed only a new one.
+  await pg.exec("create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())");
+  const done = new Set((await pg.query<{ name: string }>("select name from _migrations")).rows.map((r) => r.name));
+  const fresh = done.size === 0;
+  for (const m of migrations()) {
+    if (done.has(m.name)) continue;
+    await pg.transaction(async (tx) => {
+      await tx.exec(m.sql);
+      await tx.query("insert into _migrations (name) values ($1)", [m.name]);
+    });
   }
+  if (fresh && seed) await pg.exec(seedSql());
   return pg;
 }
 
