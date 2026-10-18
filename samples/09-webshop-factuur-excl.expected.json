@@ -1,0 +1,36 @@
+{
+  "note": "Webshop invoice that prints prices excl. VAT plus a VAT total. Lines must come back incl. VAT. Shipping has no measure.",
+  "supplier": "Gereedschapshop.nl",
+  "date": "2026-10-11",
+  "totalCents": 8203,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "LED bouwlamp 30W",
+      "qty": 1,
+      "unitPriceCents": 4999,
+      "lineTotalCents": 4999,
+      "measure": 1,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "Borenset HSS 15-delig",
+      "qty": 1,
+      "unitPriceCents": 2499,
+      "lineTotalCents": 2499,
+      "measure": 15,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "Verzendkosten",
+      "qty": 1,
+      "unitPriceCents": 705,
+      "lineTotalCents": 705,
+      "measure": null,
+      "unit": null,
+      "vatRate": 21
+    }
+  ]
+}

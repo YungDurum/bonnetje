@@ -1,0 +1,54 @@
+{
+  "note": "Mixed VAT: coffee and a snack at 9%, materials at 21%.",
+  "supplier": "Bouwcentrum De Hoek",
+  "date": "2026-10-16",
+  "totalCents": 3874,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "PVC BUIS 32MM 4M",
+      "qty": 2,
+      "unitPriceCents": 789,
+      "lineTotalCents": 1578,
+      "measure": 8,
+      "unit": "m",
+      "vatRate": 21
+    },
+    {
+      "short": "PVC BOCHT 32MM 45GR",
+      "qty": 4,
+      "unitPriceCents": 129,
+      "lineTotalCents": 516,
+      "measure": 4,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "PVC LIJM 250ML",
+      "qty": 1,
+      "unitPriceCents": 1095,
+      "lineTotalCents": 1095,
+      "measure": 0.25,
+      "unit": "L",
+      "vatRate": 21
+    },
+    {
+      "short": "KOFFIE",
+      "qty": 2,
+      "unitPriceCents": 220,
+      "lineTotalCents": 440,
+      "measure": 2,
+      "unit": "pcs",
+      "vatRate": 9
+    },
+    {
+      "short": "SAUCIJZENBROODJE",
+      "qty": 1,
+      "unitPriceCents": 245,
+      "lineTotalCents": 245,
+      "measure": 1,
+      "unit": "pcs",
+      "vatRate": 9
+    }
+  ]
+}

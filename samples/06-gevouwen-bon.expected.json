@@ -1,0 +1,27 @@
+{
+  "note": "One line is hidden under a fold, so the visible lines don't add up to the total: must be flagged for review.",
+  "supplier": "Klushuis Amersfoort",
+  "date": "2026-10-13",
+  "totalCents": 8265,
+  "needsReview": true,
+  "lines": [
+    {
+      "short": "GIPSPLAAT 260X60",
+      "qty": 6,
+      "unitPriceCents": 895,
+      "lineTotalCents": 5370,
+      "measure": 6,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "METAL STUD 50MM 3M",
+      "qty": 4,
+      "unitPriceCents": 449,
+      "lineTotalCents": 1796,
+      "measure": 12,
+      "unit": "m",
+      "vatRate": 21
+    }
+  ]
+}

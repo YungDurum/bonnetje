@@ -1,0 +1,45 @@
+{
+  "note": "Ordinary till receipt, measures printed in the item names.",
+  "supplier": "Klushuis Amersfoort",
+  "date": "2026-10-14",
+  "totalCents": 10982,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "TEGEL 30X60 WIT DOOS",
+      "qty": 3,
+      "unitPriceCents": 2495,
+      "lineTotalCents": 7485,
+      "measure": 3,
+      "unit": "boxes",
+      "vatRate": 21
+    },
+    {
+      "short": "TEGELLIJM 25KG",
+      "qty": 1,
+      "unitPriceCents": 1849,
+      "lineTotalCents": 1849,
+      "measure": 25,
+      "unit": "kg",
+      "vatRate": 21
+    },
+    {
+      "short": "VOEGMIDDEL GRIJS 5KG",
+      "qty": 1,
+      "unitPriceCents": 1299,
+      "lineTotalCents": 1299,
+      "measure": 5,
+      "unit": "kg",
+      "vatRate": 21
+    },
+    {
+      "short": "TEGELKRUISJES 3MM 200ST",
+      "qty": 1,
+      "unitPriceCents": 349,
+      "lineTotalCents": 349,
+      "measure": 200,
+      "unit": "pcs",
+      "vatRate": 21
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "note": "A4 wholesaler invoice as PDF, prices incl. VAT, one line is 5 lengths of 4 m.",
+  "supplier": "Elektrogroothandel Van Dijk B.V.",
+  "date": "2026-10-15",
+  "totalCents": 12045,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "VD KABEL 3X2,5MM2 100M",
+      "qty": 1,
+      "unitPriceCents": 8900,
+      "lineTotalCents": 8900,
+      "measure": 100,
+      "unit": "m",
+      "vatRate": 21
+    },
+    {
+      "short": "WCD INBOUW 2-VOUDIG",
+      "qty": 2,
+      "unitPriceCents": 645,
+      "lineTotalCents": 1290,
+      "measure": 2,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "LASDOOS 10ST",
+      "qty": 1,
+      "unitPriceCents": 780,
+      "lineTotalCents": 780,
+      "measure": 10,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "INSTALLATIEBUIS 16MM 4M",
+      "qty": 5,
+      "unitPriceCents": 215,
+      "lineTotalCents": 1075,
+      "measure": 20,
+      "unit": "m",
+      "vatRate": 21
+    }
+  ]
+}

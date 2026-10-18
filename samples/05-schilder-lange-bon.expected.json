@@ -1,0 +1,108 @@
+{
+  "note": "Long receipt (11 lines). Cover film is sold in m², which is not a supported unit, so its measure is unknown.",
+  "supplier": "Verfgroothandel Kleurrijk",
+  "date": "2026-10-12",
+  "totalCents": 33006,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "MUURVERF MAT WIT 10L",
+      "qty": 2,
+      "unitPriceCents": 6495,
+      "lineTotalCents": 12990,
+      "measure": 20,
+      "unit": "L",
+      "vatRate": 21
+    },
+    {
+      "short": "GRONDVERF 2,5L",
+      "qty": 1,
+      "unitPriceCents": 3299,
+      "lineTotalCents": 3299,
+      "measure": 2.5,
+      "unit": "L",
+      "vatRate": 21
+    },
+    {
+      "short": "LAKVERF HOOGGLANS 0,75L",
+      "qty": 2,
+      "unitPriceCents": 2450,
+      "lineTotalCents": 4900,
+      "measure": 1.5,
+      "unit": "L",
+      "vatRate": 21
+    },
+    {
+      "short": "KWAST PLAT 50MM",
+      "qty": 3,
+      "unitPriceCents": 795,
+      "lineTotalCents": 2385,
+      "measure": 3,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "VERFROLLER 25CM",
+      "qty": 2,
+      "unitPriceCents": 1150,
+      "lineTotalCents": 2300,
+      "measure": 2,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "SCHILDERSTAPE 50M",
+      "qty": 4,
+      "unitPriceCents": 599,
+      "lineTotalCents": 2396,
+      "measure": 200,
+      "unit": "m",
+      "vatRate": 21
+    },
+    {
+      "short": "AFDEKFOLIE 4X5M",
+      "qty": 3,
+      "unitPriceCents": 349,
+      "lineTotalCents": 1047,
+      "measure": null,
+      "unit": null,
+      "vatRate": 21
+    },
+    {
+      "short": "SCHUURPAPIER K120 10ST",
+      "qty": 1,
+      "unitPriceCents": 495,
+      "lineTotalCents": 495,
+      "measure": 10,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "PLAMUUR 1KG",
+      "qty": 1,
+      "unitPriceCents": 1395,
+      "lineTotalCents": 1395,
+      "measure": 1,
+      "unit": "kg",
+      "vatRate": 21
+    },
+    {
+      "short": "ACRYLAATKIT WIT",
+      "qty": 4,
+      "unitPriceCents": 375,
+      "lineTotalCents": 1500,
+      "measure": 4,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "VERFBAK 25CM",
+      "qty": 1,
+      "unitPriceCents": 299,
+      "lineTotalCents": 299,
+      "measure": 1,
+      "unit": "pcs",
+      "vatRate": 21
+    }
+  ]
+}

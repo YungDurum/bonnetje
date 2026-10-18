@@ -1,0 +1,36 @@
+{
+  "note": "Measures not on the receipt (assorted box, plugs): must come back as unknown. Dim, tilted photo.",
+  "supplier": "Doe-Het-Zelf Centrum Noord",
+  "date": "2026-10-17",
+  "totalCents": 2888,
+  "needsReview": false,
+  "lines": [
+    {
+      "short": "SCHROEVEN ASSORTIMENT",
+      "qty": 1,
+      "unitPriceCents": 1295,
+      "lineTotalCents": 1295,
+      "measure": null,
+      "unit": null,
+      "vatRate": 21
+    },
+    {
+      "short": "SANITAIRKIT WIT",
+      "qty": 1,
+      "unitPriceCents": 695,
+      "lineTotalCents": 695,
+      "measure": 1,
+      "unit": "pcs",
+      "vatRate": 21
+    },
+    {
+      "short": "PLUGGEN DOOS",
+      "qty": 2,
+      "unitPriceCents": 449,
+      "lineTotalCents": 898,
+      "measure": null,
+      "unit": null,
+      "vatRate": 21
+    }
+  ]
+}
