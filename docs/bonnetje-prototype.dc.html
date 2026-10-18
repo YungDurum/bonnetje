@@ -1,0 +1,1811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bonnetje prototype</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#C2410C}a:hover{color:#9A3412}
+button{-webkit-tap-highlight-color:transparent}
+@keyframes bnScan{0%{top:10%}100%{top:86%}}
+.bn-scanline{position:absolute;left:8%;right:8%;height:3px;border-radius:2px;background:#FB923C;box-shadow:0 0 14px 2px #FB923C;animation:bnScan 0.9s ease-in-out infinite alternate}
+@keyframes bnPulse{0%{opacity:.55}100%{opacity:1}}
+.bn-pulse{animation:bnPulse .7s ease-in-out infinite alternate}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: #EEF0F2; color: #16191D; font-family: 'Archivo', system-ui, sans-serif; overflow: hidden; position: relative">
+
+<!-- ============ HOME ============ -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 24px 20px 16px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="font-weight: 800; font-size: 21px; letter-spacing: -0.03em">bonnetje<span style="color: {{accent}}">.</span></div>
+</div>
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>{{ toast }}</span>
+</div>
+</sc-if>
+<div style="background: #16191D; color: #FFFFFF; border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+<div style="font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #C9CDD2">Not invoiced yet</div>
+<div style="font-family: 'IBM Plex Mono', monospace; font-size: 36px; font-weight: 600; letter-spacing: -0.02em">{{ unbilledTotal }}</div>
+<div style="font-size: 14px; color: #C9CDD2">Materials {{ unbilledMat }} · labour {{ unbilledLab }} · excl. VAT</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Active jobs</h2>
+<button type="button" onClick="{{ openNewJob }}" style="height: 44px; padding: 0 2px; border: 0; background: transparent; color: {{accent}}; font: inherit; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>New job</button>
+</div>
+<sc-for list="{{ jobs }}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{ item.open }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 6px; font: inherit; color: inherit; cursor: pointer">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%">
+<span style="font-size: 17px; font-weight: 700">{{ item.client }}</span>
+</div>
+<span style="font-size: 15px; color: #374151">{{ item.title }}</span>
+<span style="display: flex; align-items: center; gap: 5px; font-size: 13px; color: #4B5563"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>{{ item.address }}</span>
+<div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid #EEF0F2; padding-top: 10px; margin-top: 4px">
+<span style="font-size: 14px; color: #4B5563">{{ item.count }}</span>
+<sc-if value="{{ item.toInvoice }}" hint-placeholder-val="{{ true }}">
+<span style="display: flex; align-items: baseline; gap: 6px"><span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700">{{ item.total }}</span><span style="font-size: 12px; color: #4B5563">to invoice</span></span>
+</sc-if>
+<sc-if value="{{ item.invoicedTag }}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; color: #15803D"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Invoiced</span>
+</sc-if>
+<sc-if value="{{ item.nothing }}" hint-placeholder-val="{{ false }}">
+<span style="font-size: 13px; color: #4B5563">Nothing to invoice</span>
+</sc-if>
+</div>
+</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{ openStock }}" style="text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; font: inherit; color: inherit; cursor: pointer">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #EEF0F2; display: flex; align-items: center; justify-content: center; color: #374151"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h12v9H2zM14 10h4l3 3v3h-7z"></path><circle cx="6" cy="18" r="1.8"></circle><circle cx="17" cy="18" r="1.8"></circle></svg></span>
+<span style="font-size: 15px; font-weight: 700">Stock</span>
+<span style="font-size: 13px; color: #4B5563; line-height: 1.35">{{ stockCardSub }}</span>
+</button>
+<button type="button" onClick="{{ openExpenses }}" style="text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; font: inherit; color: inherit; cursor: pointer">
+<span style="width: 34px; height: 34px; border-radius: 10px; background: #EEF0F2; display: flex; align-items: center; justify-content: center; color: #374151"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg></span>
+<span style="font-size: 15px; font-weight: 700">Expenses &amp; VAT</span>
+<span style="font-size: 13px; color: #4B5563; line-height: 1.35">{{ expTileSub }}</span>
+<span style="font-size: 12px; font-weight: 700; color: {{ expTileColor }}">{{ expTileStatus }}</span>
+</button>
+</div>
+<button type="button" onClick="{{ resetDemo }}" style="align-self: center; background: none; border: 0; font: inherit; font-size: 13px; color: #4B5563; text-decoration: underline; cursor: pointer; padding: 10px">Reset demo</button>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1; background: #EEF0F2">
+<button type="button" onClick="{{ startScan }}" style="width: 100%; height: 58px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 17px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>
+Add receipt
+</button>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ CAMERA ============ -->
+<sc-if value="{{ isCamera }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; background: #0E1012; color: #FFFFFF">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 16px 14px">
+<button type="button" onClick="{{ goHome }}" aria-label="Close camera" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #24282D; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<span style="font-size: 16px; font-weight: 600">Scan receipt</span>
+<span style="width: 44px"></span>
+</div>
+<div style="flex: 1; min-height: 0; margin: 0 20px; border-radius: 22px; background: #2B2F35; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center">
+<div style="width: 222px; background: #FBFAF7; color: #23262A; transform: rotate(-2.5deg); padding: 18px 16px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.5; box-shadow: 0 18px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 3px">
+<div style="text-align: center; font-weight: 600; font-size: 13px; text-transform: uppercase">{{ sample.store }}</div>
+<div style="text-align: center; color: #555">{{ sample.city }}</div>
+<div style="text-align: center; color: #555">{{ sample.when }}</div>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<sc-for list="{{ lines }}" as="item" hint-placeholder-count="4">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ item.short }}</span><span>{{ item.price }}</span></div>
+</sc-for>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 12px"><span>TOTAL</span><span>{{ sample.total }}</span></div>
+<div style="color: #555">incl. BTW 21%</div>
+</div>
+<div style="position: absolute; top: 18px; left: 18px; width: 34px; height: 34px; border-top: 3px solid #FFFFFF; border-left: 3px solid #FFFFFF; border-top-left-radius: 10px"></div>
+<div style="position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-top: 3px solid #FFFFFF; border-right: 3px solid #FFFFFF; border-top-right-radius: 10px"></div>
+<div style="position: absolute; bottom: 18px; left: 18px; width: 34px; height: 34px; border-bottom: 3px solid #FFFFFF; border-left: 3px solid #FFFFFF; border-bottom-left-radius: 10px"></div>
+<div style="position: absolute; bottom: 18px; right: 18px; width: 34px; height: 34px; border-bottom: 3px solid #FFFFFF; border-right: 3px solid #FFFFFF; border-bottom-right-radius: 10px"></div>
+<sc-if value="{{ processing }}" hint-placeholder-val="{{ false }}">
+<div class="bn-scanline"></div>
+<div class="bn-pulse" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(14,16,18,0.85); color: #FFFFFF; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap">Reading receipt…</div>
+</sc-if>
+</div>
+<div style="padding: 18px 20px 30px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+<span style="font-size: 14px; color: #C9CDD2">Fit the whole receipt inside the frame</span>
+<button type="button" onClick="{{ shoot }}" aria-label="Take photo" style="width: 78px; height: 78px; border-radius: 999px; border: 4px solid #FFFFFF; background: transparent; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer"><span style="display: block; width: 60px; height: 60px; border-radius: 999px; background: #FFFFFF"></span></button>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ RESULT: ASSIGN ITEMS ============ -->
+<sc-if value="{{ isResult }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Discard and go home" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Where did it go?</span>
+<span style="font-size: 13px; color: #4B5563">{{ sample.store }} · {{ sample.total }} · from {{ sourceLabel }}</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 12px">
+
+<button type="button" onClick="{{ openAllSheet }}" style="width: 100%; min-height: 56px; border: 1px solid #DADDE1; border-radius: 14px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 16px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; cursor: pointer">
+<span style="display: flex; align-items: center; gap: 10px"><svg style="color: #4B5563" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>Put everything on one job</span>
+<svg style="flex: none; color: #6B7280" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+
+<sc-if value="{{ hasTodo }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #374151">Still to place · {{ todoCount }}</h2>
+<sc-for list="{{ todoLines }}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{ item.open }}" style="width: 100%; text-align: left; background: {{ item.bg }}; border: 2px solid {{ item.bd }}; border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; font: inherit; color: #16191D; cursor: pointer; box-shadow: 0 1px 4px rgba(22,25,29,0.05)">
+<span style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; width: 100%">
+<span style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 16px; font-weight: 700">{{ item.name }}</span>
+<span style="font-size: 13px; color: #4B5563; font-family: 'IBM Plex Mono', monospace">{{ item.qtyLabel }}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700; white-space: nowrap">{{ item.price }}</span>
+</span>
+<sc-if value="{{ item.isOver }}" hint-placeholder-val="{{ false }}"><span style="font-size: 13px; font-weight: 700; color: #B91C1C">Too much assigned, tap to fix</span></sc-if>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ hasDone }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Placed · {{ doneCount }}</h2>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ doneLines }}" as="item" hint-placeholder-count="2">
+<button type="button" onClick="{{ item.open }}" style="width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #EEF0F2; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font: inherit; color: inherit; cursor: pointer">
+<svg style="flex: none; color: #15803D" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">{{ item.name }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ item.summaryText }}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; white-space: nowrap">{{ item.price }}</span>
+<svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<p style="margin: 2px 4px 0; font-size: 13px; color: #4B5563; line-height: 1.45">The full receipt ({{ sample.total }} incl. VAT) goes to Moneybird as a business cost. Only what you put on a job is billed to a client.</p>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1; display: flex; flex-direction: column; gap: 10px; background: #EEF0F2">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<sc-for list="{{ summary }}" as="row" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #374151">{{ row.label }}</span><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">{{ row.amount }}</span></div>
+</sc-for>
+</div>
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ confirm }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Save receipt</button>
+</sc-if>
+<sc-if value="{{ notReady }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 16px; font-weight: 700; cursor: not-allowed">{{ unassignedLabel }}</button>
+</sc-if>
+</div>
+</div>
+
+<!-- put-everything-on sheet -->
+<sc-if value="{{ allSheetOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ closeAllSheet }}" aria-label="Close" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Put everything on one job" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 80%; overflow-y: auto; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB; flex: none"></span>
+<span style="font-size: 18px; font-weight: 700">Put everything on…</span>
+<div style="border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ allChips }}" as="j" hint-placeholder-count="3">
+<button type="button" onClick="{{ j.pick }}" aria-pressed="{{ j.on }}" style="width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #EEF0F2; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font: inherit; color: inherit; cursor: pointer">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">{{ j.client }}</span><span style="font-size: 13px; color: #4B5563">{{ j.title }}</span></span>
+<sc-if value="{{ j.on }}" hint-placeholder-val="{{ false }}"><svg style="flex: none; color: #15803D" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+</button>
+</sc-for>
+</div>
+<span style="font-size: 13px; color: #4B5563">You can still change single items afterwards.</span>
+</div>
+</div>
+</sc-if>
+
+<!-- split editor (bottom sheet) -->
+<sc-if value="{{ editOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ editDone }}" aria-label="Close split editor" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Split item" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 82%; display: flex; flex-direction: column; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<div style="padding: 10px 20px 0; display: flex; flex-direction: column; gap: 10px">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB"></span>
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 18px; font-weight: 700">{{ ed.name }}</span>
+<span style="font-size: 13px; color: #4B5563; font-family: 'IBM Plex Mono', monospace">{{ ed.totalLabel }}</span>
+</div>
+</div>
+<div style="display: flex; background: #EEF0F2; border-radius: 10px; padding: 3px; gap: 3px">
+<button type="button" onClick="{{ unitQty }}" aria-pressed="{{ ed.qOn }}" style="flex: 1; height: 36px; border: 0; border-radius: 8px; background: {{ ed.qBg }}; color: {{ ed.qFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ ed.unitQtyLabel }}</button>
+<button type="button" onClick="{{ unitEur }}" aria-pressed="{{ ed.eOn }}" style="flex: 1; height: 36px; border: 0; border-radius: 8px; background: {{ ed.eBg }}; color: {{ ed.eFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">€ Euros</button>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px 20px; display: flex; flex-direction: column; gap: 12px">
+<sc-for list="{{ ed.rows }}" as="row" hint-placeholder-count="1">
+<div style="border: 1px solid #DADDE1; border-radius: 14px; padding: 10px 10px 10px 14px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<span style="font-size: 15px; font-weight: 700">{{ row.client }}</span>
+<button type="button" onClick="{{ row.remove }}" aria-label="{{ row.removeLabel }}" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: #4B5563; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{ row.minus }}" aria-label="Less" style="width: 44px; height: 44px; flex: none; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 22px; font-weight: 600; cursor: pointer">−</button>
+<span style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; border: 1px solid #B8BDC3; border-radius: 12px; height: 44px; padding: 0 12px; background: #FFFFFF">
+<input type="text" inputmode="decimal" value="{{ row.value }}" onChange="{{ row.setText }}" aria-label="{{ row.inputLabel }}" style="flex: 1; min-width: 0; border: 0; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: #16191D; background: transparent; text-align: right">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #4B5563">{{ row.suffix }}</span>
+</span>
+<button type="button" onClick="{{ row.plus }}" aria-label="More" style="width: 44px; height: 44px; flex: none; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 22px; font-weight: 600; cursor: pointer">+</button>
+</div>
+<span style="align-self: flex-end; font-size: 13px; color: #4B5563; font-family: 'IBM Plex Mono', monospace; padding-right: 4px">{{ row.equiv }}</span>
+</div>
+</sc-for>
+<sc-if value="{{ ed.hasAdd }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 700; color: #374151">{{ ed.addTitle }}</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ ed.addChips }}" as="chip" hint-placeholder-count="3">
+<button type="button" onClick="{{ chip.pick }}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px dashed #8A8F96; background: #FFFFFF; color: #16191D; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">+ {{ chip.label }}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div style="background: #F3F4F6; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 15px; font-weight: 700; color: {{ ed.leftColor }}">{{ ed.leftText }}</span>
+<sc-if value="{{ ed.hasLeft }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; background: #E5E7EB; border-radius: 10px; padding: 3px; gap: 3px">
+<sc-for list="{{ ed.restOpts }}" as="opt" hint-placeholder-count="3">
+<button type="button" onClick="{{ opt.pick }}" aria-pressed="{{ opt.on }}" style="flex: 1; height: 38px; border: 0; border-radius: 8px; background: {{ opt.bg }}; color: {{ opt.fg }}; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer">{{ opt.label }}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</div>
+<div style="padding: 10px 20px 24px; border-top: 1px solid #EEF0F2">
+<button type="button" onClick="{{ editDone }}" style="width: 100%; height: 54px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Done</button>
+</div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ JOB DETAIL ============ -->
+<sc-if value="{{ isJob }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Back to jobs" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 19px; font-weight: 700">{{ curJob.client }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ curJob.title }} · {{ curJob.address }}</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 16px">
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>{{ toast }}</span>
+</div>
+</sc-if>
+<div style="background: #16191D; color: #FFFFFF; border-radius: 16px; padding: 16px 18px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: #C9CDD2">To invoice</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 600">{{ curToInvoice }}</span>
+<span style="font-size: 13px; color: #C9CDD2">Materials {{ curMat }} · markup {{ curMk }} · labour {{ curLab }} · excl. VAT</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Materials</h2><span style="font-size: 13px; color: #4B5563">{{ openCountLabel }}</span></div>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ openRows }}" as="row" hint-placeholder-count="3">
+<div style="border-bottom: 1px solid #EEF0F2">
+<button type="button" onClick="{{ row.toggle }}" aria-expanded="{{ row.open }}" style="width: 100%; text-align: left; background: transparent; border: 0; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font: inherit; color: inherit; cursor: pointer">
+<span style="width: 8px; height: 8px; border-radius: 999px; flex: none; background: {{ row.dot }}"></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">{{ row.title }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ row.sub }}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600">{{ row.amount }}</span>
+<sc-if value="{{ row.expandable }}" hint-placeholder-val="{{ false }}"><svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></sc-if>
+</button>
+<sc-if value="{{ row.open }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 0 14px 12px 32px; display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{ row.lines }}" as="ln" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: #374151"><span>{{ ln.name }}<span style="color: #6B7280">{{ ln.qty }}</span></span><span style="font-family: 'IBM Plex Mono', monospace">{{ ln.amount }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<sc-if value="{{ noOpenRows }}" hint-placeholder-val="{{ false }}"><div style="padding: 14px; font-size: 14px; color: #4B5563">No open materials on this job.</div></sc-if>
+<button type="button" onClick="{{ openAdd }}" style="width: 100%; height: 48px; border: 0; background: transparent; color: {{accent}}; font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add material</button>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Labour</h2>
+<button type="button" onClick="{{ openLabour }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 12px; font: inherit; color: inherit; cursor: pointer">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 15px; font-weight: 600">{{ labourRowTitle }}</span><span style="font-size: 13px; color: #4B5563">{{ labourRowSub }}</span></span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600">{{ curLabour }}</span>
+<svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</div>
+<sc-if value="{{ hasBilled }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{ toggleInvoiced }}" aria-expanded="{{ showInvoiced }}" style="width: 100%; text-align: left; background: transparent; border: 0; padding: 6px 0; display: flex; align-items: center; justify-content: space-between; font: inherit; color: #4B5563; cursor: pointer; min-height: 44px">
+<span style="font-size: 14px; font-weight: 600">Already invoiced ({{ billedCount }})</span>
+<span style="font-size: 13px; font-weight: 600">{{ invoicedToggleLabel }}</span>
+</button>
+<sc-if value="{{ showInvoiced }}" hint-placeholder-val="{{ false }}">
+<div style="background: #F7F8F9; border: 1px solid #E5E7EB; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ billedRows }}" as="row" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid #EEF0F2; color: #4B5563">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0"><span style="font-size: 14px; font-weight: 600">{{ row.title }}</span><span style="font-size: 12px">{{ row.sub }}</span></span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px">{{ row.amount }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1">
+<sc-if value="{{ canInvoice }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ openInvoice }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg>
+Create invoice · {{ curToInvoice }}
+</button>
+</sc-if>
+<sc-if value="{{ cannotInvoice }}" hint-placeholder-val="{{ false }}">
+<button type="button" disabled style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 16px; font-weight: 700; cursor: not-allowed">Nothing to invoice yet</button>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ jobSheetAdd }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ closeJobSheet }}" aria-label="Close" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Add material" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 86%; overflow-y: auto; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB; flex: none"></span>
+<sc-if value="{{ addIsMenu }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 10px"><span style="font-size: 18px; font-weight: 700">Add material</span></div>
+<button type="button" onClick="{{ addPickScan }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; font: inherit; color: #16191D; cursor: pointer">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: #EEF0F2; display: flex; align-items: center; justify-content: center; flex: none; color: #374151"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Scan a receipt</span><span style="font-size: 13px; color: #4B5563">Photo, PDF or e-invoice</span></span>
+<svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+<button type="button" onClick="{{ addPickStock }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; font: inherit; color: #16191D; cursor: pointer">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: #EEF0F2; display: flex; align-items: center; justify-content: center; flex: none; color: #374151"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h12v9H2zM14 10h4l3 3v3h-7z"></path><circle cx="6" cy="18" r="1.8"></circle><circle cx="17" cy="18" r="1.8"></circle></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">From stock</span><span style="font-size: 13px; color: #4B5563">{{ stockSummary }}</span></span>
+<svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+<button type="button" onClick="{{ addPickManual }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; font: inherit; color: #16191D; cursor: pointer">
+<span style="width: 40px; height: 40px; border-radius: 10px; background: #EEF0F2; display: flex; align-items: center; justify-content: center; flex: none; color: #374151"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg></span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Add manually</span><span style="font-size: 13px; color: #4B5563">Something without a receipt</span></span>
+<svg style="flex: none; color: #6B7280" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</sc-if>
+<sc-if value="{{ addIsStock }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px"><button type="button" onClick="{{ backToAddMenu }}" aria-label="Back" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: #EEF0F2; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button><span style="font-size: 18px; font-weight: 700">From stock</span></div>
+<div style="border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ stockRows }}" as="item" hint-placeholder-count="3">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid #EEF0F2">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">{{ item.name }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ item.left }} · {{ item.amount }}</span>
+</span>
+<button type="button" onClick="{{ item.pick }}" aria-label="{{ item.useLabel }}" style="height: 40px; padding: 0 14px; border: 1px solid #B8BDC3; border-radius: 10px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; flex: none">Use</button>
+</div>
+</sc-for>
+<sc-if value="{{ stockEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding: 14px; font-size: 14px; color: #4B5563">Nothing in stock right now.</div></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ addIsStockAmount }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px"><button type="button" onClick="{{ addPickStock }}" aria-label="Back" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: #EEF0F2; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button><div style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 18px; font-weight: 700">{{ ua.name }}</span><span style="font-size: 13px; color: #4B5563">In stock: {{ ua.avail }} · {{ ua.availAmount }}</span></div></div>
+<span style="font-size: 14px; font-weight: 600; color: #374151">How much do you use for {{ curJob.client }}?</span>
+<div style="display: flex; background: #EEF0F2; border-radius: 10px; padding: 3px; gap: 3px">
+<sc-for list="{{ ua.units }}" as="u" hint-placeholder-count="2">
+<button type="button" onClick="{{ u.pick }}" aria-pressed="{{ u.on }}" style="flex: 1; height: 36px; border: 0; border-radius: 8px; background: {{ u.bg }}; color: {{ u.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ u.label }}</button>
+</sc-for>
+</div>
+<div style="display: flex; background: #EEF0F2; border-radius: 10px; padding: 3px; gap: 3px">
+<sc-for list="{{ ua.quick }}" as="opt" hint-placeholder-count="4">
+<button type="button" onClick="{{ opt.pick }}" aria-pressed="{{ opt.on }}" style="flex: 1; height: 38px; border: 0; border-radius: 8px; background: {{ opt.bg }}; color: {{ opt.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ opt.label }}</button>
+</sc-for>
+</div>
+<sc-if value="{{ ua.showInput }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{ ua.minus }}" aria-label="Less" style="width: 48px; height: 48px; flex: none; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 22px; font-weight: 600; cursor: pointer">−</button>
+<span style="flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; border: 1px solid {{ ua.inputBd }}; border-radius: 12px; height: 48px; padding: 0 12px; background: #FFFFFF">
+<input type="text" inputmode="decimal" value="{{ ua.value }}" onChange="{{ ua.setText }}" aria-label="Amount to use" style="flex: 1; min-width: 0; border: 0; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: #16191D; background: transparent; text-align: right">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #4B5563">{{ ua.word }}</span>
+</span>
+<button type="button" onClick="{{ ua.plus }}" aria-label="More" style="width: 48px; height: 48px; flex: none; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 22px; font-weight: 600; cursor: pointer">+</button>
+</div>
+<span style="align-self: flex-end; font-size: 13px; color: #4B5563; font-family: 'IBM Plex Mono', monospace">{{ ua.equiv }}</span>
+</sc-if>
+<div style="background: #F3F4F6; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: 700"><span>On this job</span><span style="font-family: 'IBM Plex Mono', monospace">{{ ua.useAmount }}</span></div>
+<span style="font-size: 13px; color: {{ ua.restColor }}">{{ ua.restText }}</span>
+</div>
+<sc-if value="{{ ua.ok }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ ua.doUse }}" style="width: 100%; height: 52px; border: 0; border-radius: 14px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Add to {{ curJob.client }}</button>
+</sc-if>
+<sc-if value="{{ ua.notOk }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled style="width: 100%; height: 52px; border: 0; border-radius: 14px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 16px; font-weight: 700; cursor: not-allowed">{{ ua.blockedLabel }}</button>
+</sc-if>
+</sc-if>
+<sc-if value="{{ addIsManual }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: center; gap: 10px"><button type="button" onClick="{{ backToAddMenu }}" aria-label="Back" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: #EEF0F2; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button><span style="font-size: 18px; font-weight: 700">Add manually</span></div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>What is it?</span>
+<input type="text" value="{{ mName }}" onChange="{{ setMName }}" placeholder="e.g. Radiator valve" style="height: 44px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; font-size: 16px; color: #16191D; background: #FFFFFF; font-family: inherit">
+</label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>Price each, incl. VAT</span>
+<span style="display: flex; align-items: center; gap: 6px; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; height: 44px; background: #FFFFFF">
+<span style="font-family: 'IBM Plex Mono', monospace; color: #4B5563">€</span>
+<input type="text" inputmode="decimal" value="{{ mPrice }}" onChange="{{ setMPrice }}" placeholder="0.00" aria-label="Price each, incl. VAT" style="width: 100%; min-width: 0; border: 0; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: #16191D; background: transparent">
+</span>
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>Quantity</span>
+<input type="text" inputmode="decimal" value="{{ mQty }}" onChange="{{ setMQty }}" style="height: 44px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; font-size: 16px; color: #16191D; background: #FFFFFF; font-family: 'IBM Plex Mono', monospace">
+</label>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #374151">Total on this job</span><span style="font-family: 'IBM Plex Mono', monospace; font-weight: 600">{{ mTotal }}</span></div>
+<sc-if value="{{ mValid }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ addManual }}" style="width: 100%; height: 50px; border: 0; border-radius: 12px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Add to {{ curJob.client }}</button>
+</sc-if>
+<sc-if value="{{ mInvalid }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled style="width: 100%; height: 50px; border: 0; border-radius: 12px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 15px; font-weight: 700; cursor: not-allowed">Fill in a name and price</button>
+</sc-if>
+<span style="font-size: 13px; color: #4B5563; line-height: 1.4">Billed to the client. Without a receipt it is not booked as an expense, so scan the receipt if you have one.</span>
+</sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ jobSheetLabour }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ closeJobSheet }}" aria-label="Close" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Labour" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 86%; overflow-y: auto; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB; flex: none"></span>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<span style="font-size: 18px; font-weight: 700">Labour</span>
+<div style="display: flex; background: #EEF0F2; border-radius: 10px; padding: 3px; gap: 3px">
+<button type="button" onClick="{{ modeHour }}" aria-pressed="{{ isHourly }}" style="height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: {{ segHourBg }}; color: {{ segHourFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Hourly</button>
+<button type="button" onClick="{{ modeDay }}" aria-pressed="{{ isDaily }}" style="height: 36px; padding: 0 12px; border: 0; border-radius: 8px; background: {{ segDayBg }}; color: {{ segDayFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Day rate</button>
+</div>
+</div>
+<label style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; color: #374151">
+<span>{{ rateFieldLabel }}</span>
+<span style="display: flex; align-items: center; gap: 6px; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 10px; height: 44px; background: #FFFFFF">
+<span style="font-family: 'IBM Plex Mono', monospace; color: #4B5563">€</span>
+<input type="text" inputmode="decimal" value="{{ rateText }}" onChange="{{ setRateText }}" aria-label="{{ rateFieldLabel }}" style="width: 84px; border: 0; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; color: #16191D; background: transparent; text-align: right">
+</span>
+</label>
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; border-top: 1px solid #EEF0F2; padding-top: 12px">
+<div style="display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 13px; color: #4B5563">{{ qtyTitle }}</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 600">{{ curHoursLabel }}</span>
+</div>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600">{{ curLabour }}</span>
+</div>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{ subHalf }}" aria-label="{{ subLabelLong }}" style="flex: 1; height: 48px; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{ subLabel }}</button>
+<button type="button" onClick="{{ addHalf }}" aria-label="{{ addHalfLabelLong }}" style="flex: 1; height: 48px; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">{{ addHalfLabel }}</button>
+<button type="button" onClick="{{ addHour }}" aria-label="{{ addOneLabelLong }}" style="flex: 1; height: 48px; border: 0; border-radius: 12px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">{{ addOneLabel }}</button>
+</div>
+<button type="button" onClick="{{ closeJobSheet }}" style="width: 100%; height: 52px; border: 0; border-radius: 14px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Done</button>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ INVOICE ============ -->
+<sc-if value="{{ isInvoice }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ backToJob }}" aria-label="Back to job" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Invoice preview</span>
+<span style="font-size: 13px; color: #4B5563">Built from {{ curCountLabel }} and {{ curHoursLabel }}</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px">
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 6px; padding: 20px 18px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 6px 20px rgba(22,25,29,0.08)">
+<div style="display: flex; justify-content: space-between; align-items: flex-start">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Invoice</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #4B5563">#2026-0142 · 18 Oct 2026</span>
+</div>
+<span style="font-size: 13px; font-weight: 700; text-align: right; line-height: 1.3">Visser<br>Installatietechniek</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; font-size: 14px">
+<span style="font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Bill to</span>
+<span style="font-weight: 600">{{ curJob.client }}</span>
+<span style="color: #374151">{{ curJob.address }}</span>
+<span style="color: #374151">Re: {{ curJob.title }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; border-top: 1px solid #EEF0F2; padding-top: 12px">
+<sc-for list="{{ invoiceLines }}" as="item" hint-placeholder-count="2">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>{{ item.label }}</span><span style="font-family: 'IBM Plex Mono', monospace; white-space: nowrap">{{ item.amount }}</span></div>
+</sc-for>
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>{{ markupLabel }}</span><span style="font-family: 'IBM Plex Mono', monospace">{{ markupAmt }}</span></div>
+<sc-if value="{{ hasLabour }}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; justify-content: space-between; gap: 12px"><span>{{ labourLabel }}</span><span style="font-family: 'IBM Plex Mono', monospace; white-space: nowrap">{{ curLabour }}</span></div>
+</sc-if>
+<sc-if value="{{ noLabour }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; justify-content: space-between; gap: 12px; color: #4B5563"><span>Labour</span><span style="font-style: italic">no time logged</span></div>
+</sc-if>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; border-top: 1px solid #DADDE1; padding-top: 12px">
+<div style="display: flex; justify-content: space-between"><span>Subtotal excl. VAT</span><span style="font-family: 'IBM Plex Mono', monospace">{{ invSub }}</span></div>
+<div style="display: flex; justify-content: space-between"><span>VAT 21%</span><span style="font-family: 'IBM Plex Mono', monospace">{{ invVat }}</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; padding-top: 4px"><span>Total</span><span style="font-family: 'IBM Plex Mono', monospace">{{ invTotal }}</span></div>
+</div>
+<span style="font-size: 12px; color: #4B5563">Material lines are shown excl. VAT. Payment within 14 days.</span>
+</div>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ send }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14"></path><path d="M21 3l-7 18-4-7-7-4z"></path></svg>
+Send to Moneybird
+</button>
+<span style="font-size: 13px; color: #4B5563; text-align: center; line-height: 1.4">Moneybird sends it to the client and handles payment and reminders.</span>
+</sc-if>
+<sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>Invoice for {{ curJob.client }} is in Moneybird</span>
+</div>
+<button type="button" onClick="{{ goHome }}" style="width: 100%; height: 56px; border: 1px solid #B8BDC3; border-radius: 16px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer">Back to jobs</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ ADD RECEIPT ============ -->
+<sc-if value="{{ isAdd }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Close" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Add a receipt</span>
+<span style="font-size: 13px; color: #4B5563">Paper, PDF, email or e-invoice</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 10px">
+<button type="button" onClick="{{ takePhoto }}" style="width: 100%; text-align: left; background: {{accent}}; color: #FFFFFF; border: 0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; font: inherit; cursor: pointer">
+<svg style="flex: none" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Take a photo</span><span style="font-size: 13px">Paper receipt from the shop</span></span>
+</button>
+<button type="button" onClick="{{ choosePhoto }}" style="width: 100%; text-align: left; background: #FFFFFF; color: #16191D; border: 1px solid #DADDE1; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; font: inherit; cursor: pointer">
+<svg style="flex: none; color: #374151" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path></svg>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Choose from your photos</span><span style="font-size: 13px; color: #4B5563">A picture of a receipt you took earlier</span></span>
+</button>
+<button type="button" onClick="{{ uploadPdf }}" style="width: 100%; text-align: left; background: #FFFFFF; color: #16191D; border: 1px solid #DADDE1; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; font: inherit; cursor: pointer">
+<svg style="flex: none; color: #374151" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5M8.5 13h7M8.5 17h5"></path></svg>
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Upload a PDF</span><span style="font-size: 13px; color: #4B5563">Invoice from a wholesaler or webshop</span></span>
+</button>
+<button type="button" onClick="{{ openInbox }}" style="width: 100%; text-align: left; background: #FFFFFF; color: #16191D; border: 1px solid #DADDE1; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px; font: inherit; cursor: pointer">
+<svg style="flex: none; color: #374151" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6H3z"></path><path d="M3 13h5l1 3h6l1-3h5"></path></svg>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 700">Inbox</span><span style="font-size: 13px; color: #4B5563">Forwarded emails, PDFs and e-invoices</span></span>
+<sc-if value="{{ hasInbox }}" hint-placeholder-val="{{ true }}"><span style="font-size: 13px; font-weight: 700; background: {{accent}}; color: #FFFFFF; border-radius: 999px; padding: 3px 10px; flex: none">{{ inboxCount }} new</span></sc-if>
+</button>
+<div style="background: #E5E7EB; border-radius: 14px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; margin-top: 4px">
+<svg style="flex: none; color: #374151; margin-top: 2px" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"></path></svg>
+<span style="font-size: 14px; color: #23262A; line-height: 1.45"><b>Share from any app.</b> In WhatsApp, Mail or Files, tap Share and pick Bonnetje. The photo or PDF lands in your inbox.</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ READING (photo / PDF / email / e-invoice) ============ -->
+<sc-if value="{{ isReading }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column; background: #0E1012; color: #FFFFFF">
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 16px 14px">
+<button type="button" onClick="{{ goHome }}" aria-label="Cancel" style="width: 44px; height: 44px; border: 0; border-radius: 999px; background: #24282D; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<span style="font-size: 16px; font-weight: 600">{{ readingTitle }}</span>
+<span style="width: 44px"></span>
+</div>
+<div style="flex: 1; min-height: 0; margin: 0 20px 30px; border-radius: 22px; background: #2B2F35; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{ readIsPhoto }}" hint-placeholder-val="{{ false }}">
+<div style="width: 222px; background: #FBFAF7; color: #23262A; transform: rotate(-2.5deg); padding: 18px 16px 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.5; box-shadow: 0 18px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 3px">
+<div style="text-align: center; font-weight: 600; font-size: 13px; text-transform: uppercase">{{ sample.store }}</div>
+<div style="text-align: center; color: #555">{{ sample.when }}</div>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<sc-for list="{{ lines }}" as="item" hint-placeholder-count="4"><div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ item.short }}</span><span>{{ item.price }}</span></div></sc-for>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 12px"><span>TOTAL</span><span>{{ sample.total }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ readIsPdf }}" hint-placeholder-val="{{ false }}">
+<div style="position: relative; width: 270px; background: #FFFFFF; color: #23262A; padding: 34px 18px 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 10px; font-size: 11px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start"><span style="font-size: 18px; font-weight: 800">FACTUUR</span><span style="font-weight: 700; font-size: 13px">{{ sample.store }}</span></div>
+<span style="color: #555; font-family: 'IBM Plex Mono', monospace">{{ sample.when }}</span>
+<div style="border-top: 1px solid #D1D5DB; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; font-family: 'IBM Plex Mono', monospace">
+<sc-for list="{{ lines }}" as="item" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ item.short }}</span><span>{{ item.price }}</span></div></sc-for>
+</div>
+<div style="border-top: 1px solid #D1D5DB; padding-top: 8px; display: flex; justify-content: space-between; font-weight: 700; font-size: 12px; font-family: 'IBM Plex Mono', monospace"><span>TOTAAL incl. BTW</span><span>{{ sample.total }}</span></div>
+<span style="position: absolute; top: 14px; right: 14px; font-size: 11px; font-weight: 700; background: #374151; color: #FFFFFF; border-radius: 4px; padding: 2px 6px">PDF</span>
+</div>
+</sc-if>
+<sc-if value="{{ readIsEmail }}" hint-placeholder-val="{{ false }}">
+<div style="width: 280px; background: #FFFFFF; color: #23262A; border-radius: 12px; padding: 16px; box-shadow: 0 18px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 8px; font-size: 12px">
+<span style="color: #4B5563">From: {{ sample.store }}</span>
+<span style="font-size: 14px; font-weight: 700">Your order is on its way</span>
+<span style="color: #4B5563; font-family: 'IBM Plex Mono', monospace">{{ sample.when }}</span>
+<div style="border-top: 1px solid #E5E7EB; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px">
+<sc-for list="{{ lines }}" as="item" hint-placeholder-count="2"><div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ item.short }}</span><span>{{ item.price }}</span></div></sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; font-weight: 700; font-family: 'IBM Plex Mono', monospace"><span>Total incl. VAT</span><span>{{ sample.total }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ readIsEinv }}" hint-placeholder-val="{{ false }}">
+<div style="width: 280px; background: #FFFFFF; color: #23262A; border-radius: 12px; padding: 16px; box-shadow: 0 18px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 8px; font-size: 12px">
+<span style="align-self: flex-start; font-size: 11px; font-weight: 700; background: #DBEAFE; color: #1E3A8A; border-radius: 4px; padding: 2px 6px">E-INVOICE · UBL</span>
+<span style="font-size: 14px; font-weight: 700">{{ sample.store }}</span>
+<span style="color: #4B5563">Structured data straight from the wholesaler. Nothing to read, nothing to guess.</span>
+<div style="border-top: 1px solid #E5E7EB; padding-top: 8px; display: flex; flex-direction: column; gap: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 11px">
+<sc-for list="{{ lines }}" as="item" hint-placeholder-count="3"><div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ item.short }}</span><span>{{ item.price }}</span></div></sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ readScan }}" hint-placeholder-val="{{ false }}"><div class="bn-scanline"></div></sc-if>
+<div class="bn-pulse" style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(14,16,18,0.85); color: #FFFFFF; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; white-space: nowrap">{{ readingLabel }}</div>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ INBOX ============ -->
+<sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ backToAdd }}" aria-label="Back" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Inbox</span>
+<span style="font-size: 13px; color: #4B5563">Waiting to be put on jobs</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="background: #16191D; color: #FFFFFF; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; color: #C9CDD2">Forward receipts and invoices to</span>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600">jan@in.bonnetje.app</span>
+<button type="button" onClick="{{ copyAddress }}" style="height: 36px; padding: 0 12px; border: 1px solid #4B5563; border-radius: 10px; background: transparent; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; flex: none">{{ copyLabel }}</button>
+</div>
+<span style="font-size: 13px; color: #C9CDD2; line-height: 1.4">Give it to your wholesalers too: e-invoices (UBL) arrive with exact data, no reading needed.</span>
+</div>
+<sc-for list="{{ inboxRows }}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{ item.open }}" style="width: 100%; text-align: left; background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; font: inherit; color: inherit; cursor: pointer">
+<span style="width: 64px; flex: none; text-align: center; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 4px 0; background: {{ item.badgeBg }}; color: {{ item.badgeFg }}">{{ item.badge }}</span>
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 700">{{ item.store }}</span>
+<span style="font-size: 13px; color: #374151">{{ item.title }}</span>
+<span style="font-size: 12px; color: #4B5563">{{ item.sub }}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">{{ item.amount }}</span>
+</button>
+</sc-for>
+<sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 18px 16px; font-size: 14px; color: #4B5563">All caught up. New forwards show up here.</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ NEW JOB ============ -->
+<sc-if value="{{ isNewJob }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Cancel" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">New job</span>
+<span style="font-size: 13px; color: #4B5563">Who is it for and what are you doing?</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 20px; display: flex; flex-direction: column; gap: 14px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span style="font-weight: 600">Client</span>
+<input type="text" value="{{ njClient }}" onChange="{{ setNjClient }}" placeholder="e.g. Fam. Smit" style="height: 48px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; color: #16191D; background: #FFFFFF">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span style="font-weight: 600">What's the job?</span>
+<input type="text" value="{{ njTitle }}" onChange="{{ setNjTitle }}" placeholder="e.g. New radiators upstairs" style="height: 48px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; color: #16191D; background: #FFFFFF">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span style="font-weight: 600">Address <span style="font-weight: 400; color: #4B5563">(optional)</span></span>
+<input type="text" value="{{ njAddress }}" onChange="{{ setNjAddress }}" placeholder="Street and town" style="height: 48px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 12px; padding: 0 14px; font: inherit; font-size: 16px; color: #16191D; background: #FFFFFF">
+</label>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px; font-weight: 600; color: #374151">Labour on this job</span>
+<div style="display: flex; background: #E5E7EB; border-radius: 10px; padding: 3px; gap: 3px">
+<button type="button" onClick="{{ njHourly }}" aria-pressed="{{ njIsHourly }}" style="flex: 1; height: 40px; border: 0; border-radius: 8px; background: {{ njHourBg }}; color: {{ njHourFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Hourly</button>
+<button type="button" onClick="{{ njDaily }}" aria-pressed="{{ njIsDaily }}" style="flex: 1; height: 40px; border: 0; border-radius: 8px; background: {{ njDayBg }}; color: {{ njDayFg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">Day rate</button>
+</div>
+</div>
+<span style="font-size: 13px; color: #4B5563; line-height: 1.45">The client and the job are also created in Moneybird, so the invoice lands on the right contact and project.</span>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1">
+<sc-if value="{{ njValid }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ createJob }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Create job</button>
+</sc-if>
+<sc-if value="{{ njInvalid }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 16px; font-weight: 700; cursor: not-allowed">Fill in a client and a job</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ STOCK ============ -->
+<sc-if value="{{ isStock }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Back to home" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Stock</span>
+<span style="font-size: 13px; color: #4B5563">{{ stockCardSub }}</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 12px">
+<label style="display: flex; align-items: center; gap: 10px; height: 48px; border: 1px solid #B8BDC3; border-radius: 12px; padding: 0 14px; background: #FFFFFF; color: #4B5563">
+<svg style="flex: none" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+<input type="search" value="{{ stockQuery }}" onChange="{{ setStockQuery }}" placeholder="Search stock" aria-label="Search stock" style="flex: 1; min-width: 0; border: 0; outline: none; font: inherit; font-size: 16px; color: #16191D; background: transparent">
+</label>
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>{{ toast }}</span>
+</div>
+</sc-if>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ stockList }}" as="item" hint-placeholder-count="3">
+<button type="button" onClick="{{ item.select }}" style="width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #EEF0F2; padding: 13px 14px 13px 16px; display: flex; align-items: center; gap: 12px; font: inherit; color: inherit; cursor: pointer">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">{{ item.name }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ item.left }} left · {{ item.from }}</span>
+</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600">{{ item.amount }}</span>
+<svg style="flex: none; color: #4B5563" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</sc-for>
+<sc-if value="{{ stockListEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding: 16px; font-size: 14px; color: #4B5563">{{ stockEmptyText }}</div>
+</sc-if>
+</div>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1">
+<button type="button" onClick="{{ openStockForm }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add to stock</button>
+</div>
+</div>
+
+<!-- add-to-stock sheet -->
+<sc-if value="{{ sfOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ closeStockForm }}" aria-label="Close" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Add to stock" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 86%; overflow-y: auto; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB; flex: none"></span>
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 15px; font-weight: 700">Add to stock</span>
+<button type="button" onClick="{{ closeStockForm }}" aria-label="Close" style="width: 40px; height: 40px; border: 0; border-radius: 10px; background: transparent; color: #4B5563; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>What is it?</span>
+<input type="text" value="{{ sfName }}" onChange="{{ setSfName }}" placeholder="e.g. Copper elbows 15 mm" style="height: 44px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; font: inherit; font-size: 16px; color: #16191D; background: #FFFFFF">
+</label>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>How much?</span>
+<input type="text" inputmode="decimal" value="{{ sfAmount }}" onChange="{{ setSfAmount }}" placeholder="e.g. 20" style="height: 44px; box-sizing: border-box; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: #16191D; background: #FFFFFF">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #374151">
+<span>Value, incl. VAT</span>
+<span style="display: flex; align-items: center; gap: 6px; border: 1px solid #B8BDC3; border-radius: 10px; padding: 0 12px; height: 44px; background: #FFFFFF">
+<span style="font-family: 'IBM Plex Mono', monospace; color: #4B5563">€</span>
+<input type="text" inputmode="decimal" value="{{ sfPrice }}" onChange="{{ setSfPrice }}" placeholder="0.00" aria-label="Value incl. VAT" style="width: 100%; min-width: 0; border: 0; outline: none; font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: #16191D; background: transparent">
+</span>
+</label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 14px; color: #374151">Unit</span>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{ sfUnits }}" as="u" hint-placeholder-count="5">
+<button type="button" onClick="{{ u.pick }}" aria-pressed="{{ u.on }}" style="height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ u.bd }}; background: {{ u.bg }}; color: {{ u.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ u.label }}</button>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ sfValid }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ addToStock }}" style="width: 100%; height: 48px; border: 0; border-radius: 12px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Add to stock</button>
+</sc-if>
+<sc-if value="{{ sfInvalid }}" hint-placeholder-val="{{ true }}">
+<button type="button" disabled style="width: 100%; height: 48px; border: 0; border-radius: 12px; background: #DADDE1; color: #4B5563; font: inherit; font-size: 15px; font-weight: 700; cursor: not-allowed">Fill in a name, amount and value</button>
+</sc-if>
+<span style="font-size: 13px; color: #4B5563; line-height: 1.4">For things you already had in stock. Bought it new? Add the receipt instead, so it's booked as an expense too.</span>
+</div>
+</div>
+</sc-if>
+
+<!-- stock item sheet -->
+<sc-if value="{{ stockSelOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; display: flex; flex-direction: column; background: rgba(14,16,18,0.55)">
+<button type="button" onClick="{{ closeSel }}" aria-label="Close" style="flex: 1; min-height: 60px; border: 0; background: transparent; cursor: pointer"></button>
+<div role="dialog" aria-label="Stock item" style="background: #FFFFFF; border-radius: 22px 22px 0 0; max-height: 86%; overflow-y: auto; padding: 10px 20px 26px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25)">
+<span style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: #D1D5DB; flex: none"></span>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 18px; font-weight: 700">{{ sel.name }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ sel.left }} left · {{ sel.amount }} · from {{ sel.from }}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">Use on a job</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{ sel.jobChips }}" as="chip" hint-placeholder-count="3">
+<button type="button" onClick="{{ chip.pick }}" aria-pressed="{{ chip.on }}" style="height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ chip.bd }}; background: {{ chip.bg }}; color: {{ chip.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ chip.label }}</button>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ sel.hasJob }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 14px; color: #374151">How much did you use?</span>
+<div style="display: flex; background: #EEF0F2; border-radius: 10px; padding: 3px; gap: 3px">
+<sc-for list="{{ sel.fracOpts }}" as="opt" hint-placeholder-count="4">
+<button type="button" onClick="{{ opt.pick }}" aria-pressed="{{ opt.on }}" style="flex: 1; height: 38px; border: 0; border-radius: 8px; background: {{ opt.bg }}; color: {{ opt.fg }}; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer">{{ opt.label }}</button>
+</sc-for>
+</div>
+<span style="font-size: 14px; color: #23262A; font-family: 'IBM Plex Mono', monospace">{{ sel.useText }}</span>
+<button type="button" onClick="{{ sel.doUse }}" style="width: 100%; height: 52px; border: 0; border-radius: 14px; background: {{accent}}; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer">Put on {{ sel.jobClient }}</button>
+</div>
+</sc-if>
+<div style="border-top: 1px solid #EEF0F2; padding-top: 12px; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{ sel.notAsking }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ sel.askRemove }}" style="width: 100%; height: 48px; border: 1px solid #B91C1C; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font: inherit; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>Remove from stock</button>
+</sc-if>
+<sc-if value="{{ sel.asking }}" hint-placeholder-val="{{ false }}">
+<div style="background: #FFF3EB; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 10px">
+<span style="font-size: 14px; color: #7C2D12">Remove from stock? Used up or thrown away. It is not billed, and stays in your bookkeeping as a cost.</span>
+<div style="display: flex; gap: 8px">
+<button type="button" onClick="{{ sel.cancelRemove }}" style="flex: 1; height: 44px; border: 1px solid #B8BDC3; border-radius: 10px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Keep</button>
+<button type="button" onClick="{{ sel.doRemove }}" style="flex: 1; height: 44px; border: 0; border-radius: 10px; background: #B91C1C; color: #FFFFFF; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer">Remove</button>
+</div>
+</div>
+</sc-if>
+<button type="button" onClick="{{ closeSel }}" style="width: 100%; height: 48px; border: 1px solid #B8BDC3; border-radius: 12px; background: #FFFFFF; color: #16191D; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer">Close</button>
+</div>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ EXPENSES ============ -->
+<sc-if value="{{ isExpenses }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ goHome }}" aria-label="Back to home" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">Expenses</span>
+<span style="font-size: 13px; color: #4B5563">Q4 2026 · October–December</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="background: #16191D; color: #FFFFFF; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #C9CDD2">Spent incl. VAT</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600">{{ expTotal }}</span>
+<span style="font-size: 12px; color: #C9CDD2">{{ expExcl }} excl. VAT</span>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 13px; color: #4B5563">VAT paid</span>
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600">{{ expVat }}</span>
+<span style="font-size: 12px; color: #4B5563">To reclaim in your VAT return</span>
+</div>
+</div>
+<sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}">
+<div style="background: #FFF3EB; color: #7C2D12; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+<span style="flex: 1; font-size: 15px; font-weight: 600">{{ pendingLabel }}</span>
+<button type="button" onClick="{{ sendAll }}" style="height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; flex: none">Send now</button>
+</div>
+</sc-if>
+<sc-if value="{{ allSent }}" hint-placeholder-val="{{ true }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>All receipts are in Moneybird</span>
+</div>
+</sc-if>
+<h2 style="margin: 4px 0 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #4B5563">{{ expCountLabel }}</h2>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; display: flex; flex-direction: column">
+<sc-for list="{{ ledgerRows }}" as="item" hint-placeholder-count="4">
+<button type="button" onClick="{{ item.open }}" style="width: 100%; text-align: left; background: transparent; border: 0; border-bottom: 1px solid #EEF0F2; padding: 13px 16px; display: flex; align-items: center; gap: 12px; font: inherit; color: inherit; cursor: pointer">
+<span style="flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">{{ item.store }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ item.sub }}</span>
+</span>
+<span style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600">{{ item.amount }}</span>
+<sc-if value="{{ item.sent }}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; font-weight: 600; color: #15803D">In Moneybird</span></sc-if>
+<sc-if value="{{ item.pending }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; font-weight: 600; color: #C2410C">Not sent</span></sc-if>
+</span>
+</button>
+</sc-for>
+</div>
+<p style="margin: 0 4px; font-size: 13px; color: #4B5563; line-height: 1.45">Dutch businesses generally have to keep their records for 7 years. Every receipt photo stays attached to its booking.</p>
+</div>
+<div style="padding: 12px 20px 26px; border-top: 1px solid #DADDE1; display: flex; flex-direction: column; gap: 10px">
+<sc-if value="{{ notExported }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ doExport }}" style="width: 100%; height: 56px; border: 0; border-radius: 16px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg>
+Export Q4 for your accountant
+</button>
+</sc-if>
+<sc-if value="{{ exported }}" hint-placeholder-val="{{ false }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>{{ exportLabel }}</span>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<!-- ============ EXPENSE DETAIL ============ -->
+<sc-if value="{{ isExpense }}" hint-placeholder-val="{{ false }}">
+<div style="flex: 1; min-height: 0; display: flex; flex-direction: column">
+<div style="display: flex; align-items: center; gap: 10px; padding: 18px 16px 10px">
+<button type="button" onClick="{{ backToExpenses }}" aria-label="Back to expenses" style="width: 44px; height: 44px; border: 1px solid #DADDE1; border-radius: 999px; background: #FFFFFF; color: #16191D; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<div style="display: flex; flex-direction: column">
+<span style="font-size: 19px; font-weight: 700">{{ exp.store }}</span>
+<span style="font-size: 13px; color: #4B5563">{{ exp.date }} · {{ exp.cat }}</span>
+</div>
+</div>
+<div style="flex: 1; min-height: 0; overflow-y: auto; padding: 8px 20px 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="background: #2B2F35; border-radius: 16px; padding: 22px 16px; display: flex; justify-content: center">
+<div style="width: 230px; background: #FBFAF7; color: #23262A; transform: rotate(-1.5deg); padding: 16px 14px 18px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 1.5; box-shadow: 0 14px 30px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 3px">
+<div style="text-align: center; font-weight: 600; font-size: 13px; text-transform: uppercase">{{ exp.store }}</div>
+<div style="text-align: center; color: #555">{{ exp.date }}</div>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<sc-for list="{{ exp.items }}" as="line" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 8px"><span>{{ line.short }}</span><span>{{ line.price }}</span></div>
+</sc-for>
+<div style="border-top: 1px dashed #8A8F96; margin: 6px 0"></div>
+<div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 12px"><span>TOTAL</span><span>{{ exp.total }}</span></div>
+<div style="color: #555">incl. BTW 21%</div>
+</div>
+</div>
+<span style="font-size: 13px; color: #4B5563; text-align: center">Original {{ exp.sourceLabel }}, stored with the booking</span>
+<div style="background: #FFFFFF; border: 1px solid #DADDE1; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<div style="display: flex; justify-content: space-between"><span style="color: #374151">Excl. VAT</span><span style="font-family: 'IBM Plex Mono', monospace">{{ exp.excl }}</span></div>
+<div style="display: flex; justify-content: space-between"><span style="color: #374151">VAT 21%</span><span style="font-family: 'IBM Plex Mono', monospace">{{ exp.vat }}</span></div>
+<div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700"><span>Total</span><span style="font-family: 'IBM Plex Mono', monospace">{{ exp.total }}</span></div>
+<div style="border-top: 1px solid #EEF0F2; padding-top: 8px; display: flex; flex-direction: column; gap: 3px">
+<span style="color: #4B5563; font-size: 13px">Where it went</span>
+<span>{{ exp.split }}</span>
+</div>
+</div>
+<sc-if value="{{ expSent }}" hint-placeholder-val="{{ true }}">
+<div style="background: #DCFCE7; color: #14532D; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600">
+<svg style="flex: none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.8 2.8L16.5 9.5"></path></svg>
+<span>Booked in Moneybird, photo attached</span>
+</div>
+</sc-if>
+<sc-if value="{{ expPending }}" hint-placeholder-val="{{ false }}">
+<div style="background: #FFF3EB; color: #7C2D12; border-radius: 14px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+<span style="flex: 1; font-size: 15px; font-weight: 600">Not in Moneybird yet</span>
+<button type="button" onClick="{{ sendOne }}" style="height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: #16191D; color: #FFFFFF; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; flex: none">Send</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C2410C","options":["#C2410C","#1D4ED8","#15803D","#16191D"]},"markup":{"editor":"int","default":15,"min":0,"max":50,"unit":"%"},"rate":{"editor":"float","default":62.5,"min":0,"max":200,"step":0.5,"unit":"€/h"},"dayRate":{"editor":"float","default":450,"min":0,"max":2000,"step":5,"unit":"€/day"},"$preview":{"width":390,"height":844}}'>
+var BN_JOBS = [
+  { id: "devries", short: "de Vries", client: "Fam. de Vries", title: "Bathroom renovation", address: "Lindenlaan 14, Amstelveen", today: true },
+  { id: "bakker", short: "Bakker", client: "Bakker & Zn", title: "Kitchen rewiring", address: "Javastraat 40, Amsterdam", today: false },
+  { id: "jansen", short: "Jansen", client: "M. Jansen", title: "Boiler replacement", address: "Westzijde 88, Zaandam", today: true }
+];
+var BN_SEED = {
+  devries: [{ id: "r1", store: "Gamma", date: "Wed 14 Oct", detail: "3 items", cents: 4620, lines: [{ name: "Washbasin tap", qty: "", cents: 2995 }, { name: "Chrome siphon", qty: "", cents: 1249 }, { name: "Coupling 15 mm", qty: "", cents: 376 }] }],
+  bakker: [{ id: "r2", store: "Technische Unie", date: "Thu 15 Oct", detail: "3 items", cents: 16840, lines: [{ name: "Installation cable 3×2.5 mm²", qty: "50 m", cents: 4950 }, { name: "Consumer unit, 6 groups", qty: "", cents: 10495 }, { name: "Surface socket, double", qty: "", cents: 1395 }] }],
+  jansen: [{ id: "r3", store: "Wasco", date: "Fri 16 Oct", detail: "3 items", cents: 38950, lines: [{ name: "Flue gas set", qty: "", cents: 31200 }, { name: "Expansion vessel 18 L", qty: "", cents: 5890 }, { name: "Ball valve 22 mm", qty: "", cents: 1860 }] }, { id: "r4", store: "Praxis", date: "Fri 16 Oct", detail: "1 item, partly", cents: 2399, lines: [{ name: "Sealant", qty: "1 of 2 pcs", cents: 2399 }] }]
+};
+var BN_STOCK = [
+  { id: "s1", name: "PVC pipe 32 mm", left: "2 of 4 m", qty: 2, word: "m", from: "Wasco", cents: 620 },
+  { id: "s2", name: "Primer, white", left: "1 of 2.5 L", qty: 1, word: "L", from: "Gamma", cents: 1180 },
+  { id: "s3", name: "Copper elbows 15 mm", left: "12 pcs", qty: 12, word: "pcs", from: "Technische Unie", cents: 1440 },
+  { id: "s4", name: "Sanitary silicone, white", left: "2 pcs", qty: 2, word: "pcs", from: "Praxis", cents: 1390 }
+];
+// amount + word = the total measure on the line, used to say what is left over
+var BN_SAMPLES = [
+  {
+    store: "Hornbach", city: "Amsterdam", when: "Sun 18 Oct · 08:42",
+    items: [
+      { name: "Wall tiles 30×60 white", short: "TEGEL 30X60 WIT", qty: 3, unit: 2495, amount: 3, word: "boxes" },
+      { name: "Tile adhesive 25 kg", short: "TEGELLIJM 25KG", qty: 1, unit: 1849, amount: 25, word: "kg" },
+      { name: "Grout, grey 5 kg", short: "VOEGMIDDEL GRIJS", qty: 1, unit: 1299, amount: 5, word: "kg" },
+      { name: "Screws 4×40, 200 pcs", short: "SCHROEF 4X40 200ST", qty: 1, unit: 1895, amount: 200, word: "pcs" },
+      { name: "Ceiling paint white 2.5 L", short: "PLAFONDVERF 2,5L", qty: 1, unit: 3499, amount: 2.5, word: "L" }
+    ]
+  },
+  {
+    store: "Technische Unie", city: "Amsterdam", when: "Sun 18 Oct · 13:15",
+    items: [
+      { name: "Installation cable 3×2.5 mm², 100 m", short: "VD KABEL 3X2.5 100M", qty: 1, unit: 8900, amount: 100, word: "m" },
+      { name: "Flush socket, double", short: "WCD INBOUW 2V", qty: 2, unit: 645, amount: 2, word: "pcs" },
+      { name: "Junction boxes, 10 pcs", short: "LASDOOS 10ST", qty: 1, unit: 780, amount: 10, word: "pcs" }
+    ]
+  },
+  {
+    store: "Wasco", city: "Zaandam", when: "Sat 17 Oct · invoice 2026-88123",
+    items: [
+      { name: "Thermostatic radiator valve", short: "THERM. RADIATORKRAAN", qty: 4, unit: 2450, amount: 4, word: "pcs" },
+      { name: "Copper pipe 15 mm, 5 m", short: "KOPERBUIS 15MM 5M", qty: 1, unit: 2895, amount: 5, word: "m" },
+      { name: "Press fittings 15 mm, 10 pcs", short: "PERSFITTING 15MM 10ST", qty: 1, unit: 3480, amount: 10, word: "pcs" }
+    ]
+  },
+  {
+    store: "Bol.com", city: "Online order", when: "Fri 16 Oct · order 4021-7713",
+    items: [
+      { name: "LED work light 30 W", short: "LED BOUWLAMP 30W", qty: 1, unit: 4999, amount: 1, word: "pcs" },
+      { name: "Drill bit set, 15 pcs", short: "BORENSET 15DLG", qty: 1, unit: 2499, amount: 15, word: "pcs" }
+    ]
+  },
+  {
+    store: "Technische Unie", city: "E-invoice", when: "Sat 17 Oct · e-invoice TU-55871",
+    items: [
+      { name: "Cable duct 40×40, 2 m", short: "KABELGOOT 40X40 2M", qty: 3, unit: 645, amount: 6, word: "m" },
+      { name: "Circuit breaker 16 A", short: "AUTOMAAT 16A", qty: 2, unit: 1295, amount: 2, word: "pcs" },
+      { name: "Residual current device 40 A", short: "AARDLEKSCHAKELAAR 40A", qty: 1, unit: 4950, amount: 1, word: "pcs" }
+    ]
+  }
+];
+var BN_INBOX = [
+  { id: "i1", kind: "PDF", sample: 2, title: "factuur_2026-88123.pdf", via: "Forwarded by email", date: "Sat 17 Oct" },
+  { id: "i2", kind: "E-invoice", sample: 4, title: "E-invoice TU-55871 (UBL)", via: "Sent by the wholesaler", date: "Sat 17 Oct" },
+  { id: "i3", kind: "Email", sample: 3, title: "Order confirmation 4021-7713", via: "Forwarded by email", date: "Fri 16 Oct" }
+];
+var BN_KIND = {
+  "Photo": { key: "photo", label: "photo", title: "Reading photo", reading: "Reading receipt…", badge: "PHOTO", bg: "#E5E7EB", fg: "#23262A" },
+  "PDF": { key: "pdf", label: "PDF", title: "Reading PDF", reading: "Reading PDF…", badge: "PDF", bg: "#E5E7EB", fg: "#23262A" },
+  "Email": { key: "email", label: "email", title: "Reading email", reading: "Reading email…", badge: "EMAIL", bg: "#E5E7EB", fg: "#23262A" },
+  "E-invoice": { key: "einv", label: "e-invoice", title: "E-invoice", reading: "Importing e-invoice…", badge: "E-INVOICE", bg: "#DBEAFE", fg: "#1E3A8A" }
+};
+var BN_LEDGER = [
+  { id: "L1", store: "Shell", date: "Mon 12 Oct", cat: "Fuel", source: "Photo", cents: 7840, status: "sent", split: "Business cost, not billed to a client", items: [{ short: "EURO95 41,2L", price: "€78.40" }] },
+  { id: "L2", store: "Gamma", date: "Wed 14 Oct", cat: "Materials", source: "Photo", cents: 7570, status: "sent", split: "€46.20 → Fam. de Vries · primer → stock", items: [{ short: "KRAAN WASTAFEL", price: "€29.95" }, { short: "SIFON CHROOM", price: "€12.49" }, { short: "KOPPELING 15MM", price: "€3.76" }, { short: "PRIMER WIT 2,5L", price: "€29.50" }] },
+  { id: "L3", store: "Technische Unie", date: "Thu 15 Oct", cat: "Materials", source: "E-invoice", cents: 16840, status: "sent", split: "€168.40 → Bakker & Zn", items: [{ short: "VD KABEL 3X2.5 50M", price: "€49.50" }, { short: "GROEPENKAST 6GR", price: "€104.95" }, { short: "WCD OPBOUW 2V", price: "€13.95" }] },
+  { id: "L4", store: "Wasco", date: "Fri 16 Oct", cat: "Materials", source: "PDF", cents: 40190, status: "sent", split: "€389.50 → M. Jansen · PVC pipe → stock", items: [{ short: "ROOKGASAFVOER SET", price: "€312.00" }, { short: "EXPANSIEVAT 18L", price: "€58.90" }, { short: "KOGELKRAAN 22MM", price: "€18.60" }, { short: "PVC BUIS 32MM 4M", price: "€12.40" }] },
+  { id: "L5", store: "Praxis", date: "Fri 16 Oct", cat: "Materials", source: "Photo", cents: 4798, status: "pending", split: "€23.99 → M. Jansen · €23.99 not billed", items: [{ short: "2X AFDICHTKIT", price: "€47.98" }] }
+];
+var BN_SHARES = [{ v: 1, l: "All" }, { v: 0.75, l: "¾" }, { v: 0.5, l: "½" }, { v: 0.25, l: "¼" }];
+var BN_HOURS = { devries: 6, bakker: 0, jansen: 4.5 };
+var BN_DAYS = { devries: 1, bakker: 0, jansen: 0.5 };
+
+function bnFmt(c) { return "€" + (c / 100).toFixed(2); }
+function bnNum(x) { return Number.isInteger(x) ? String(x) : String(Math.round(x * 100) / 100); }
+function bnHrs(h) { return String(h) + " h"; }
+function bnDays(d) { return String(d) + (d === 1 ? " day" : " days"); }
+function bnSample(idx) { return BN_SAMPLES[idx] || BN_SAMPLES[0]; }
+function bnBlankAssign(idx) { return bnSample(idx).items.map(function () { return { rows: [], rest: "stock", touched: false }; }); }
+function bnCopySeed() {
+  var out = {};
+  Object.keys(BN_SEED).forEach(function (k) { out[k] = BN_SEED[k].map(function (r) { return Object.assign({}, r); }); });
+  return out;
+}
+function bnFreshState() {
+  return {
+    receipts: bnCopySeed(), stock: BN_STOCK.map(function (x) { return Object.assign({}, x); }),
+    jobs: BN_JOBS.map(function (x) { return Object.assign({}, x); }),
+    nj: { client: "", title: "", address: "", today: true, mode: "hour" },
+    ledger: BN_LEDGER.map(function (x) { return Object.assign({}, x); }), expenseId: "L1", exported: false,
+    hours: Object.assign({}, BN_HOURS), days: Object.assign({}, BN_DAYS), billing: {},
+    screen: "home", scanIdx: 0, cur: 0, source: "Photo", inboxId: null, copied: false,
+    inbox: BN_INBOX.map(function (x) { return Object.assign({}, x); }),
+    assign: bnBlankAssign(0), processing: false,
+    jobId: "devries", toast: "", sent: false
+  };
+}
+function bnChip(on, accent, dark) {
+  var fill = dark ? "#16191D" : accent;
+  return on ? { bg: fill, fg: "#FFFFFF", bd: fill, on: true } : { bg: "#FFFFFF", fg: "#16191D", bd: "#B8BDC3", on: false };
+}
+function bnSeg(on) { return on ? { bg: "#16191D", fg: "#FFFFFF", on: true } : { bg: "transparent", fg: "#374151", on: false }; }
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = bnFreshState();
+  }
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); }
+
+  renderVals() {
+    var self = this;
+    var s = this.state;
+    var accent = this.props.accent ?? "#C2410C";
+    var markup = this.props.markup ?? 15;
+    var defHour = this.props.rate ?? 62.5;
+    var defDay = this.props.dayRate ?? 450;
+    var hrs = s.hours || {};
+    var dys = s.days || {};
+    var JOBS = s.jobs || BN_JOBS;
+    var jobById = function (id) { return JOBS.find(function (j) { return j.id === id; }) || JOBS[0]; };
+
+    // ---------- labour per job ----------
+    var billFor = function (id) {
+      var b = (s.billing || {})[id] || {};
+      var mode = b.mode || "hour";
+      var text = mode === "hour" ? (b.hourText ?? String(defHour)) : (b.dayText ?? String(defDay));
+      var n = parseFloat(String(text).replace(",", "."));
+      if (!isFinite(n) || n < 0) n = 0;
+      var qty = mode === "hour" ? (hrs[id] || 0) : (dys[id] || 0);
+      return { mode: mode, text: text, rateC: Math.round(n * 100), qty: qty, qtyLabel: mode === "hour" ? bnHrs(qty) : bnDays(qty) };
+    };
+
+    // ---------- the scanned receipt ----------
+    var raw = bnSample(s.cur || 0);
+    var asg = s.assign && s.assign.length === raw.items.length ? s.assign : bnBlankAssign(s.cur || 0);
+    var getAsg = function () {
+      var a = self.state.assign;
+      return a && a.length === raw.items.length ? a : bnBlankAssign(self.state.cur || 0);
+    };
+    var setAssign = function (i, patch, extra) {
+      var a = getAsg().slice();
+      a[i] = Object.assign({}, a[i], patch);
+      self.setState(Object.assign({ assign: a }, extra || {}));
+    };
+    var EPS = 1e-6;
+    var r2 = function (x) { return Math.round(x * 100) / 100; };
+    var sTotal = 0;
+    var perJob = {}, stockC = 0, wasteC = 0, unplaced = 0, overN = 0;
+    var calc = raw.items.map(function (it, i) {
+      var a = asg[i] || { rows: [], rest: "stock", touched: false };
+      var line = it.qty * it.unit;
+      sTotal += line;
+      var M = it.amount;
+      var pc = line / M;
+      var rows = a.rows || [];
+      var used = rows.reduce(function (t, r) { return t + (r.qty || 0); }, 0);
+      var over = used > M + EPS;
+      var left = Math.max(0, M - used);
+      var billed = rows.map(function (r) { return Math.round((r.qty || 0) * pc); });
+      var billedSum = billed.reduce(function (t, x) { return t + x; }, 0);
+      var leftC = over ? 0 : Math.max(0, line - billedSum);
+      var clientRow = rows.find(function (r) { return (r.qty || 0) > EPS; }) || null;
+      var rest = a.rest === "client" && !clientRow ? "stock" : (a.rest || "stock");
+      if (!a.touched) unplaced++;
+      if (a.touched && over) overN++;
+      if (a.touched && !over) {
+        rows.forEach(function (r, k) {
+          if (!((r.qty || 0) > EPS)) return;
+          var pj = perJob[r.job] || (perJob[r.job] = { cents: 0, items: 0, partly: 0 });
+          pj.cents += billed[k]; pj.items++;
+          if (r.qty < M - EPS) pj.partly++;
+        });
+        if (leftC > 0) {
+          if (rest === "client") perJob[clientRow.job].cents += leftC;
+          else if (rest === "waste") wasteC += leftC;
+          else stockC += leftC;
+        }
+      }
+      var parts = rows.filter(function (r) { return (r.qty || 0) > EPS; }).map(function (r) {
+        return bnNum(r2(r.qty)) + " " + it.word + " → " + jobById(r.job).short;
+      });
+      if (left > EPS && !over) parts.push(bnNum(r2(left)) + " " + it.word + " → " + (rest === "client" ? "client keeps it" : rest === "waste" ? "waste" : "stock"));
+      return { it: it, a: a, line: line, M: M, pc: pc, rows: rows, used: used, over: over, left: left, leftC: leftC, clientRow: clientRow, rest: rest, parts: parts, billed: billed };
+    });
+    var lines = calc.map(function (c, i) {
+      var it = c.it;
+      return {
+        name: it.name, short: (it.qty > 1 ? it.qty + "x " : "") + it.short,
+        qtyLabel: it.qty > 1 ? it.qty + " × " + bnFmt(it.unit) : bnNum(it.amount) + " " + it.word,
+        price: bnFmt(c.line),
+        placed: !!c.a.touched && !c.over, unplaced: !c.a.touched, isOver: !!c.a.touched && c.over,
+        summaryText: c.parts.join(" · "),
+        border: !c.a.touched ? "2px dashed #F3C6A8" : (c.over ? "2px solid #B91C1C" : "1px solid #DADDE1"),
+        todo: !c.a.touched || c.over,
+        bg: c.over ? "#FFF7F7" : "#FFFCEB", bd: c.over ? "#E8A3A3" : "#F0E2A8",
+        pillBg: c.over ? "#FEE2E2" : "#FFF3EB", pillFg: c.over ? "#B91C1C" : accent,
+        cta: c.over ? "Too much assigned, fix it" : "Choose where it goes",
+        open: function () { self.setState({ editIdx: i, editUnit: "qty" }); }
+      };
+    });
+
+    var todoLines = lines.filter(function (l) { return l.todo; });
+    var doneLines = lines.filter(function (l) { return !l.todo; });
+
+    // ---------- split editor (bottom sheet) ----------
+    var UNIT_NAMES = { pcs: "Pieces", m: "Metres", L: "Litres", kg: "Kilos", boxes: "Boxes" };
+    var ei = typeof s.editIdx === "number" && calc[s.editIdx] ? s.editIdx : null;
+    var ed = { name: "", totalLabel: "", unitQtyLabel: "", rows: [], addChips: [], hasAdd: false, addTitle: "", leftText: "", leftColor: "#16191D", hasLeft: false, restOpts: [], qBg: "transparent", qFg: "#374151", eBg: "transparent", eFg: "#374151", qOn: false, eOn: false };
+    if (ei !== null) {
+      var ec = calc[ei], eit = ec.it, eur = s.editUnit === "eur";
+      var rowsArr = ec.rows;
+      var setRows = function (rs) { setAssign(ei, { rows: rs }); };
+      var updRow = function (k, patch) { setRows(rowsArr.map(function (r, x) { return x === k ? Object.assign({}, r, patch) : r; })); };
+      var stepQ = eit.word === "L" ? 0.25 : 1;
+      ed = {
+        name: eit.name,
+        totalLabel: "Total " + bnNum(ec.M) + " " + eit.word + " · " + bnFmt(ec.line),
+        unitQtyLabel: UNIT_NAMES[eit.word] || "Pieces",
+        qOn: !eur, eOn: eur,
+        qBg: eur ? "transparent" : "#16191D", qFg: eur ? "#374151" : "#FFFFFF",
+        eBg: eur ? "#16191D" : "transparent", eFg: eur ? "#FFFFFF" : "#374151",
+        rows: rowsArr.map(function (r, k) {
+          var q = r.qty || 0;
+          var cents = Math.round(q * ec.pc);
+          var j = jobById(r.job);
+          return {
+            client: j.client,
+            value: r.text != null ? r.text : (eur ? (cents / 100).toFixed(2) : bnNum(r2(q))),
+            suffix: eur ? "€" : eit.word,
+            equiv: eur ? "= " + bnNum(r2(q)) + " " + eit.word : "= " + bnFmt(cents),
+            inputLabel: (eur ? "Euros for " : "Amount for ") + j.client,
+            removeLabel: "Remove " + j.client,
+            remove: function () { setRows(rowsArr.filter(function (_, x) { return x !== k; })); },
+            minus: function () { updRow(k, { qty: eur ? Math.max(0, (cents - 100) / ec.pc) : Math.max(0, r2(q - stepQ)), text: null }); },
+            plus: function () { updRow(k, { qty: eur ? (cents + 100) / ec.pc : r2(q + stepQ), text: null }); },
+            setText: function (e) {
+              var v = e && e.target ? e.target.value : "";
+              var n = parseFloat(String(v).replace(",", "."));
+              var nq = isFinite(n) && n >= 0 ? (eur ? n * 100 / ec.pc : n) : 0;
+              updRow(k, { qty: nq, text: v });
+            }
+          };
+        }),
+        addTitle: rowsArr.length ? "Add another job" : "Put it on a job",
+        addChips: JOBS.filter(function (j) { return !rowsArr.some(function (r) { return r.job === j.id; }); }).map(function (j) {
+          return { label: j.short, pick: function () { setRows(rowsArr.concat([{ job: j.id, qty: rowsArr.length ? 0 : ec.M, text: null }])); } };
+        }),
+        leftText: ec.over ? "Too much: " + bnNum(r2(ec.used - ec.M)) + " " + eit.word + " over" : (ec.left > EPS ? "Left over: " + bnNum(r2(ec.left)) + " " + eit.word + " · " + bnFmt(ec.leftC) : "Nothing left over"),
+        leftColor: ec.over ? "#B91C1C" : "#16191D",
+        hasLeft: !ec.over && ec.left > EPS,
+        restOpts: [{ v: "stock", l: "Stock" }].concat(ec.clientRow ? [{ v: "client", l: "Client keeps it" }] : []).concat([{ v: "waste", l: "Waste" }]).map(function (o) {
+          return Object.assign({ label: o.l, pick: function () { setAssign(ei, { rest: o.v }); } }, bnSeg(ec.rest === o.v));
+        })
+      };
+      ed.hasAdd = ed.addChips.length > 0;
+    }
+    var clearTexts = function (rs) { return rs.map(function (r) { return Object.assign({}, r, { text: null }); }); };
+    var editDone = function () { if (ei === null) return; setAssign(ei, { touched: true, rows: clearTexts(calc[ei].rows) }, { editIdx: null }); };
+    var setEditUnit = function (u) { if (ei === null) return; setAssign(ei, { rows: clearTexts(calc[ei].rows) }, { editUnit: u }); };
+    var sExcl = Math.round(sTotal / 1.21);
+    var sample = { store: raw.store, city: raw.city, when: raw.when, total: bnFmt(sTotal) };
+    var kind = BN_KIND[s.source] || BN_KIND.Photo;
+
+    // ---------- other receipt sources ----------
+    var startRead = function (source, cur, inboxId) {
+      if (self._t) clearTimeout(self._t);
+      self.setState({ screen: "reading", source: source, cur: cur, inboxId: inboxId, assign: bnBlankAssign(cur), toast: "", editIdx: null });
+      self._t = setTimeout(function () { self.setState({ screen: "result" }); }, source === "E-invoice" ? 900 : 1600);
+    };
+    var inbox = s.inbox || [];
+    var inboxRows = inbox.map(function (x) {
+      var smp = bnSample(x.sample);
+      var tot = smp.items.reduce(function (a, i) { return a + i.qty * i.unit; }, 0);
+      var k = BN_KIND[x.kind] || BN_KIND.PDF;
+      return {
+        store: smp.store, title: x.title, sub: x.via + " · " + x.date, amount: bnFmt(tot),
+        badge: k.badge, badgeBg: k.bg, badgeFg: k.fg,
+        open: function () { startRead(x.kind, x.sample, x.id); }
+      };
+    });
+
+    var allChips = JOBS.map(function (j) {
+      var on = calc.every(function (c) { return c.a.touched && c.rows.length === 1 && c.rows[0].job === j.id && Math.abs((c.rows[0].qty || 0) - c.M) < EPS; });
+      return Object.assign({
+        label: j.short, client: j.client, title: j.title,
+        pick: function () {
+          var a = calc.map(function (c) { return { rows: [{ job: j.id, qty: c.M, text: null }], rest: "stock", touched: true }; });
+          self.setState({ assign: a, allSheet: false });
+        }
+      }, bnChip(on, accent, false));
+    });
+
+    var summary = [];
+    JOBS.forEach(function (j) { if (perJob[j.id]) summary.push({ label: "To " + j.client, amount: bnFmt(perJob[j.id].cents) }); });
+    if (stockC > 0) summary.push({ label: "Into stock", amount: bnFmt(stockC) });
+    if (wasteC > 0) summary.push({ label: "Not billed (waste)", amount: bnFmt(wasteC) });
+
+    // ---------- jobs, stock ----------
+    var all = s.receipts;
+    // what still has to be invoiced per job: unbilled materials (excl. VAT) + markup + labour
+    var invFor = function (id) {
+      var allRs = all[id] || [];
+      var rs = allRs.filter(function (r) { return !r.billed; });
+      var mat = rs.reduce(function (a, r) { return a + Math.round(r.cents / 1.21); }, 0);
+      var mk = Math.round(mat * markup / 100);
+      var b = billFor(id);
+      var lab = Math.round(b.qty * b.rateC);
+      return { rs: rs, mat: mat, mk: mk, lab: lab, sub: mat + mk + lab, qtyLabel: b.qtyLabel, anyBilled: allRs.some(function (r) { return r.billed; }) };
+    };
+    var count = 0, totSub = 0, totMat = 0, totLab = 0, jobsOpen = 0;
+    var jobs = JOBS.map(function (j) {
+      var inv = invFor(j.id);
+      count += inv.rs.length;
+      totSub += inv.sub; totMat += inv.mat + inv.mk; totLab += inv.lab;
+      if (inv.sub > 0) jobsOpen++;
+      return {
+        id: j.id, client: j.client, title: j.title, address: j.address, today: j.today, subC: inv.sub,
+        count: inv.rs.length + (inv.rs.length === 1 ? " receipt" : " receipts") + " · " + inv.qtyLabel,
+        total: bnFmt(inv.sub),
+        toInvoice: inv.sub > 0, invoicedTag: inv.sub === 0 && inv.anyBilled, nothing: inv.sub === 0 && !inv.anyBilled,
+        open: function () { self.setState({ screen: "job", jobId: j.id, toast: "", sent: false, stockOpen: false, manualOpen: false, jobSheet: null, openEntry: null, showInvoiced: false }); }
+      };
+    });
+    jobs.sort(function (a, b) { return b.subC - a.subC; });
+
+    var curJob = jobById(s.jobId) || JOBS[0];
+    var stock = s.stock || [];
+    var stockSum = stock.reduce(function (a, x) { return a + x.cents; }, 0);
+    var leftOf = function (x) { return x.qty != null ? bnNum(r2(x.qty)) + " " + x.word : x.left; };
+    var stockRows = stock.map(function (x) {
+      return {
+        name: x.name, left: leftOf(x), from: x.from, amount: bnFmt(x.cents),
+        pending: s.pendingRemove === x.id,
+        removeLabel: "Remove " + x.name + " from stock",
+        askRemove: function () { self.setState({ pendingRemove: x.id, toast: "" }); },
+        cancelRemove: function () { self.setState({ pendingRemove: null }); },
+        doRemove: function () {
+          self.setState({ stock: self.state.stock.filter(function (y) { return y.id !== x.id; }), pendingRemove: null, toast: x.name + " removed from stock" });
+        },
+        useLabel: "Use " + x.name + " on " + curJob.client,
+        pick: function () { self.setState({ addMode: "stockAmount", addStockSel: x.id, addQty: null, addQtyText: null, addFrac: 1, addUnit: "qty", addEurC: null, addEurText: null }); },
+        use: function () {
+          var rest = self.state.stock.filter(function (y) { return y.id !== x.id; });
+          var rec = Object.assign({}, self.state.receipts);
+          rec[curJob.id] = (rec[curJob.id] || []).map(function (r) { return Object.assign({}, r, { isNew: false }); })
+            .concat([{ id: "u" + Date.now(), store: "Stock", date: "Today", detail: x.name + " (" + leftOf(x) + ")", cents: x.cents, isNew: true, fromStock: true }]);
+          self.setState({ stock: rest, receipts: rec, jobSheet: null, toast: x.name + " added from stock" });
+        }
+      };
+    });
+
+    // ---------- use stock on this job, with an amount ----------
+    var uaX = stock.find(function (x) { return x.id === s.addStockSel; }) || null;
+    var ua = { name: "", avail: "", availAmount: "", quick: [], hasQty: false, value: "", word: "", inputBd: "#B8BDC3", useAmount: "", restText: "", restColor: "#4B5563", ok: false, notOk: true, blockedLabel: "" };
+    if (uaX) {
+      var uHas = uaX.qty != null && uaX.qty > 0;
+      var uFrac = s.addFrac == null ? 1 : s.addFrac;
+      var uEur = s.addUnit === "eur";
+      var uE = s.addEurC == null ? uaX.cents : s.addEurC;
+      var uQ = uHas ? (uEur ? uaX.qty * uE / uaX.cents : (s.addQty == null ? uaX.qty : s.addQty)) : null;
+      var uShare = uEur ? uE / uaX.cents : (uHas ? (uQ / uaX.qty) : uFrac);
+      var uOver = uShare > 1 + 1e-9;
+      var uC = uOver ? 0 : (uEur ? Math.round(uE) : Math.round(uaX.cents * Math.min(1, uShare)));
+      var setE = function (c, text) { self.setState({ addEurC: Math.max(0, c), addEurText: text == null ? null : text }); };
+      var setUnit = function (u) { self.setState({ addUnit: u, addEurC: u === "eur" ? uC : null, addEurText: null, addQty: u === "qty" && uHas ? r2(uQ) : null, addQtyText: null, addFrac: u === "qty" && !uHas ? 1 : s.addFrac }); };
+      var uOk = uShare > 1e-9 && !uOver;
+      var uStep = uaX.word === "L" ? 0.25 : 1;
+      var setQ = function (q, text) { self.setState({ addQty: Math.max(0, q), addQtyText: text == null ? null : text }); };
+      ua = {
+        name: uaX.name, avail: leftOf(uaX), availAmount: bnFmt(uaX.cents),
+        quick: BN_SHARES.map(function (o) {
+          var on = (uHas || uEur) ? Math.abs(uShare - o.v) < 1e-6 : uFrac === o.v;
+          return Object.assign({ label: o.l, pick: function () { if (uEur) setE(Math.round(uaX.cents * o.v), null); else if (uHas) setQ(uaX.word === "pcs" || uaX.word === "boxes" ? Math.round(uaX.qty * o.v) : r2(uaX.qty * o.v), null); else self.setState({ addFrac: o.v }); } }, bnSeg(on));
+        }),
+        hasQty: uHas, showInput: uHas || uEur,
+        units: [{ v: "qty", l: uHas ? (UNIT_NAMES[uaX.word] || "Amount") : "Part" }, { v: "eur", l: "€ Euros" }].map(function (o) {
+          return Object.assign({ label: o.l, pick: function () { setUnit(o.v); } }, bnSeg((uEur ? "eur" : "qty") === o.v));
+        }),
+        equiv: uEur ? (uHas ? "= " + bnNum(r2(uQ)) + " " + uaX.word : "") : "= " + bnFmt(uC),
+        value: uEur ? (s.addEurText != null ? s.addEurText : (uE / 100).toFixed(2)) : (s.addQtyText != null ? s.addQtyText : (uHas ? bnNum(r2(uQ)) : "")),
+        word: uEur ? "€" : (uaX.word || ""),
+        inputBd: uOver ? "#B91C1C" : "#B8BDC3",
+        minus: function () { if (uEur) setE(uE - 100, null); else setQ(r2((uQ || 0) - uStep), null); },
+        plus: function () { if (uEur) setE(uE + 100, null); else setQ(r2((uQ || 0) + uStep), null); },
+        setText: function (e) { var v = e && e.target ? e.target.value : ""; var n = parseFloat(String(v).replace(",", ".")); if (uEur) setE(isFinite(n) ? Math.round(n * 100) : 0, v); else setQ(isFinite(n) ? n : 0, v); },
+        useAmount: bnFmt(uC),
+        restText: uOver ? "You only have " + leftOf(uaX) + " in stock" : (uShare >= 1 - 1e-9 ? "Nothing left in stock after this" : "Stays in stock: " + (uHas ? bnNum(r2(uaX.qty - uQ)) + " " + uaX.word + " · " : "") + bnFmt(uaX.cents - uC)),
+        restColor: uOver ? "#B91C1C" : "#4B5563",
+        ok: uOk, notOk: !uOk,
+        blockedLabel: uOver ? "More than you have" : "Choose an amount",
+        doUse: function () {
+          if (!uOk) return;
+          var all1 = uShare >= 1 - 1e-9;
+          var usedLabel = uHas ? bnNum(r2(uQ)) + " " + uaX.word : (uEur ? bnFmt(uC) + " worth" : ({ 0.75: "¾", 0.5: "½", 0.25: "¼" }[uFrac] || "all"));
+          var rec = Object.assign({}, self.state.receipts);
+          rec[curJob.id] = (rec[curJob.id] || []).map(function (r) { return Object.assign({}, r, { isNew: false }); })
+            .concat([{ id: "u" + Date.now(), store: "Stock", date: "Today", detail: uaX.name + " (" + usedLabel + ")", cents: uC, isNew: true, fromStock: true }]);
+          var newStock = self.state.stock.map(function (y) {
+            if (y.id !== uaX.id) return y;
+            var nq = uHas ? r2(y.qty - uQ) : y.qty;
+            return Object.assign({}, y, { cents: y.cents - uC, qty: nq, left: uHas ? bnNum(nq) + " " + y.word : y.left });
+          }).filter(function (y) { return !(y.id === uaX.id && all1); });
+          self.setState({ receipts: rec, stock: newStock, jobSheet: null, addStockSel: null, toast: uaX.name + " (" + usedLabel + ") added from stock" });
+        }
+      };
+    }
+
+    var curAll = all[curJob.id] || [];
+    var curInv = invFor(curJob.id);
+    var curRs = curInv.rs;
+    var curSum = curRs.reduce(function (a, r) { return a + r.cents; }, 0);
+    var rowOf = function (r) {
+      var isRec = !r.fromStock && !r.manual;
+      var lines = (r.lines || []).map(function (l) { return { name: l.name, qty: l.qty ? " · " + l.qty : "", amount: bnFmt(l.cents) }; });
+      var expandable = isRec && lines.length > 0;
+      return {
+        title: isRec ? r.store : r.detail,
+        sub: isRec ? r.date + " · " + (lines.length ? lines.length + (lines.length === 1 ? " item" : " items") : r.detail) : (r.fromStock ? "From stock" : "Added manually") + " · " + r.date,
+        amount: bnFmt(r.cents), lines: lines, expandable: expandable,
+        open: expandable && s.openEntry === r.id,
+        dot: r.isNew && !r.billed ? "#15803D" : "transparent",
+        toggle: function () { if (expandable) self.setState({ openEntry: s.openEntry === r.id ? null : r.id }); }
+      };
+    };
+    var openRows = curAll.filter(function (r) { return !r.billed; }).slice().reverse().map(rowOf);
+    var billedRows = curAll.filter(function (r) { return r.billed; }).slice().reverse().map(rowOf);
+    var curReceipts = curAll.slice().reverse().map(function (r) {
+      return { store: r.store, date: r.date, detail: r.detail, amount: bnFmt(r.cents), isNew: !!r.isNew && !r.billed, billed: !!r.billed, amountColor: r.billed ? "#6B7280" : "#16191D" };
+    });
+
+    var matExcl = curInv.mat;
+    var invoiceLines = curRs.map(function (r) {
+      var ex = Math.round(r.cents / 1.21);
+      var label = (r.fromStock || r.manual) ? "Materials — " + r.detail : "Materials — " + r.store + ", " + r.date.replace(/^\w+ /, "");
+      return { label: label, amount: bnFmt(ex) };
+    });
+    var markupC = curInv.mk;
+
+    var bill = billFor(curJob.id);
+    var hourly = bill.mode === "hour";
+    var curH = bill.qty;
+    var rateC = bill.rateC;
+    var labourC = Math.round(curH * rateC);
+    var patchBill = function (patch) {
+      var all2 = Object.assign({}, self.state.billing || {});
+      all2[curJob.id] = Object.assign({}, all2[curJob.id] || {}, patch);
+      self.setState({ billing: all2, toast: "" });
+    };
+    var setH = function (d) {
+      var key = hourly ? "hours" : "days";
+      var next = Object.assign({}, self.state[key]);
+      next[curJob.id] = Math.max(0, (next[curJob.id] || 0) + d);
+      var upd = { toast: "" }; upd[key] = next;
+      self.setState(upd);
+    };
+    var invSubC = matExcl + markupC + labourC;
+
+    // ---------- stock page ----------
+    var q = String(s.stockQuery || "").trim().toLowerCase();
+    var stockList = stock.slice().reverse().filter(function (x) { return !q || x.name.toLowerCase().indexOf(q) >= 0 || String(x.from).toLowerCase().indexOf(q) >= 0; }).map(function (x) {
+      return { name: x.name, left: leftOf(x), from: x.from, amount: bnFmt(x.cents), select: function () { self.setState({ stockSel: x.id, stockJob: null, stockFrac: 1, stockAsk: false, toast: "" }); } };
+    });
+    var selX = stock.find(function (x) { return x.id === s.stockSel; }) || null;
+    var sel = { name: "", left: "", amount: "", from: "", jobChips: [], fracOpts: [], hasJob: false, useText: "", jobClient: "", asking: false, notAsking: true };
+    if (selX) {
+      var sFrac = s.stockFrac || 1;
+      var sJob = s.stockJob ? jobById(s.stockJob) : null;
+      var hasQty = selX.qty != null;
+      var useC = Math.round(selX.cents * sFrac);
+      var useQty = hasQty ? r2(selX.qty * sFrac) : null;
+      var fracName = { 1: "all", 0.75: "¾", 0.5: "½", 0.25: "¼" }[sFrac] || "part";
+      sel = {
+        name: selX.name, left: leftOf(selX), amount: bnFmt(selX.cents), from: selX.from,
+        jobChips: JOBS.map(function (j) { return Object.assign({ label: j.short, pick: function () { self.setState({ stockJob: j.id }); } }, bnChip(!!sJob && sJob.id === j.id, accent, false)); }),
+        fracOpts: BN_SHARES.map(function (o) { return Object.assign({ label: o.l, pick: function () { self.setState({ stockFrac: o.v }); } }, bnSeg(sFrac === o.v)); }),
+        hasJob: !!sJob, jobClient: sJob ? sJob.client : "",
+        useText: (hasQty ? bnNum(useQty) + " " + selX.word + " · " : "") + bnFmt(useC) + (sJob ? " → " + sJob.short : "") + (sFrac < 1 ? " · the rest stays in stock" : ""),
+        asking: !!s.stockAsk, notAsking: !s.stockAsk,
+        askRemove: function () { self.setState({ stockAsk: true }); },
+        cancelRemove: function () { self.setState({ stockAsk: false }); },
+        doRemove: function () {
+          self.setState({ stock: self.state.stock.filter(function (y) { return y.id !== selX.id; }), stockSel: null, stockAsk: false, toast: selX.name + " removed from stock" });
+        },
+        doUse: function () {
+          if (!sJob) return;
+          var rec = Object.assign({}, self.state.receipts);
+          var detail = selX.name + " (" + (hasQty ? bnNum(useQty) + " " + selX.word : fracName) + ")";
+          rec[sJob.id] = (rec[sJob.id] || []).map(function (r) { return Object.assign({}, r, { isNew: false }); })
+            .concat([{ id: "u" + Date.now(), store: "Stock", date: "Today", detail: detail, cents: useC, isNew: true, fromStock: true }]);
+          var newStock = self.state.stock.map(function (y) {
+            if (y.id !== selX.id) return y;
+            return Object.assign({}, y, { cents: y.cents - useC, qty: hasQty ? r2(y.qty - useQty) : y.qty, left: hasQty ? bnNum(r2(y.qty - useQty)) + " " + y.word : y.left });
+          }).filter(function (y) { return !(y.id === selX.id && sFrac === 1); });
+          self.setState({ receipts: rec, stock: newStock, stockSel: null, toast: detail + " put on " + sJob.client });
+        }
+      };
+    }
+
+    // ---------- add to stock form ----------
+    var sf = s.sf || { name: "", amount: "", word: "pcs", price: "" };
+    var sfAmountN = parseFloat(String(sf.amount || "").replace(",", "."));
+    var sfPriceN = parseFloat(String(sf.price || "").replace(",", "."));
+    var sfOk = String(sf.name || "").trim().length > 0 && isFinite(sfAmountN) && sfAmountN > 0 && isFinite(sfPriceN) && sfPriceN > 0;
+    var setSf = function (patch) { self.setState({ sf: Object.assign({}, self.state.sf || { name: "", amount: "", word: "pcs", price: "" }, patch) }); };
+    var sfUnits = [{ w: "pcs", l: "Pieces" }, { w: "m", l: "Metres" }, { w: "L", l: "Litres" }, { w: "kg", l: "Kilos" }, { w: "boxes", l: "Boxes" }].map(function (u) {
+      return Object.assign({ label: u.l, pick: function () { setSf({ word: u.w }); } }, bnChip(sf.word === u.w, accent, true));
+    });
+
+    // ---------- new job form ----------
+    var nj = s.nj || { client: "", title: "", address: "", today: true, mode: "hour" };
+    var njOk = String(nj.client || "").trim().length > 0 && String(nj.title || "").trim().length > 0;
+    var setNj = function (patch) { self.setState({ nj: Object.assign({}, self.state.nj || {}, patch) }); };
+
+    // ---------- manual item draft ----------
+    var mPriceN = parseFloat(String(s.mPrice || "").replace(",", "."));
+    var mQtyN = parseFloat(String(s.mQty ?? "1").replace(",", "."));
+    if (!isFinite(mQtyN) || mQtyN <= 0) mQtyN = 0;
+    var mCents = isFinite(mPriceN) && mPriceN > 0 ? Math.round(mPriceN * 100 * mQtyN) : 0;
+    var mOk = String(s.mName || "").trim().length > 0 && mCents > 0;
+
+    // ---------- expenses ledger ----------
+    var ledger = s.ledger || [];
+    var expC = 0, expVatC = 0, pendingN = 0;
+    ledger.forEach(function (x) { expC += x.cents; expVatC += x.cents - Math.round(x.cents / 1.21); if (x.status !== "sent") pendingN++; });
+    var expCardSub = ledger.length + " receipts · " + bnFmt(expC) + " · " + (pendingN ? pendingN + " not in Moneybird" : "all in Moneybird");
+    var ledgerRows = ledger.slice().reverse().map(function (x) {
+      return {
+        store: x.store, sub: x.date + " · " + x.cat + (x.source ? " · " + (BN_KIND[x.source] || BN_KIND.Photo).label : ""), amount: bnFmt(x.cents),
+        sent: x.status === "sent", pending: x.status !== "sent",
+        open: function () { self.setState({ screen: "expense", expenseId: x.id }); }
+      };
+    });
+    var curExp = ledger.find(function (x) { return x.id === s.expenseId; }) || ledger[0] || { store: "", date: "", cat: "", cents: 0, status: "sent", split: "", items: [] };
+    var curExpVat = curExp.cents - Math.round(curExp.cents / 1.21);
+    var exp = {
+      store: curExp.store, date: curExp.date, cat: curExp.cat, split: curExp.split, items: curExp.items,
+      sourceLabel: (BN_KIND[curExp.source] || BN_KIND.Photo).label,
+      total: bnFmt(curExp.cents), vat: bnFmt(curExpVat), excl: bnFmt(curExp.cents - curExpVat)
+    };
+    var invVatC = Math.round(invSubC * 0.21);
+
+    return {
+      accent: accent,
+      isHome: s.screen === "home", isCamera: s.screen === "camera", isResult: s.screen === "result",
+      isAdd: s.screen === "add", isReading: s.screen === "reading", isInbox: s.screen === "inbox",
+      sourceLabel: kind.label, readingTitle: kind.title, readingLabel: kind.reading,
+      readIsPhoto: kind.key === "photo", readIsPdf: kind.key === "pdf", readIsEmail: kind.key === "email", readIsEinv: kind.key === "einv",
+      readScan: kind.key !== "einv",
+      inboxRows: inboxRows, inboxCount: String(inbox.length), hasInbox: inbox.length > 0, inboxEmpty: inbox.length === 0,
+      copyLabel: s.copied ? "Copied" : "Copy",
+      copyAddress: function () { self.setState({ copied: true }); },
+      backToAdd: function () { self.setState({ screen: "add" }); },
+      openInbox: function () { self.setState({ screen: "inbox", copied: false }); },
+      takePhoto: function () { self.setState({ screen: "camera", processing: false, cur: self.state.scanIdx % 2, source: "Photo", inboxId: null, editIdx: null, assign: bnBlankAssign(self.state.scanIdx % 2) }); },
+      choosePhoto: function () { startRead("Photo", self.state.scanIdx % 2, null); },
+      uploadPdf: function () { startRead("PDF", 2, null); },
+      isJob: s.screen === "job", isInvoice: s.screen === "invoice",
+      isExpenses: s.screen === "expenses", isExpense: s.screen === "expense",
+      isNewJob: s.screen === "newjob",
+      openRows: openRows, noOpenRows: openRows.length === 0,
+      openCountLabel: openRows.length ? (openRows.length === 1 ? "1 open" : openRows.length + " open") : "",
+      billedRows: billedRows, hasBilled: billedRows.length > 0, billedCount: String(billedRows.length),
+      showInvoiced: !!s.showInvoiced, invoicedToggleLabel: s.showInvoiced ? "Hide" : "Show",
+      toggleInvoiced: function () { self.setState({ showInvoiced: !self.state.showInvoiced }); },
+      curMat: bnFmt(curInv.mat), curMk: bnFmt(curInv.mk), curLab: bnFmt(curInv.lab),
+      labourRowTitle: curH > 0 ? bill.qtyLabel + " × " + bnFmt(rateC) : "No time logged yet",
+      labourRowSub: (hourly ? "Hourly" : "Day rate") + " · tap to change",
+      jobSheetAdd: s.jobSheet === "add", jobSheetLabour: s.jobSheet === "labour",
+      addIsMenu: (s.addMode || "menu") === "menu", addIsStock: s.addMode === "stock", addIsManual: s.addMode === "manual",
+      addIsStockAmount: s.addMode === "stockAmount" && !!uaX, ua: ua,
+      openAdd: function () { self.setState({ jobSheet: "add", addMode: "menu", toast: "" }); },
+      openLabour: function () { self.setState({ jobSheet: "labour", toast: "" }); },
+      closeJobSheet: function () { self.setState({ jobSheet: null }); },
+      addPickStock: function () { self.setState({ addMode: "stock" }); },
+      addPickManual: function () { self.setState({ addMode: "manual" }); },
+      addPickScan: function () { self.setState({ jobSheet: null, screen: "add", toast: "" }); },
+      backToAddMenu: function () { self.setState({ addMode: "menu" }); },
+      isStock: s.screen === "stock",
+      expTileSub: "Q4 2026 · " + bnFmt(expC),
+      expTileStatus: pendingN ? (pendingN === 1 ? "1 not in Moneybird" : pendingN + " not in Moneybird") : "All in Moneybird",
+      expTileColor: pendingN ? "#C2410C" : "#15803D",
+      stockCardSub: stock.length + (stock.length === 1 ? " item" : " items") + " · " + bnFmt(stockSum),
+      openStock: function () { self.setState({ screen: "stock", toast: "", stockQuery: "", stockSel: null, sfOpen: false }); },
+      stockQuery: s.stockQuery || "",
+      setStockQuery: function (e) { self.setState({ stockQuery: e && e.target ? e.target.value : "" }); },
+      stockList: stockList, stockListEmpty: stockList.length === 0,
+      stockEmptyText: stock.length === 0 ? "Nothing in stock right now." : "Nothing matches your search.",
+      stockSelOpen: !!selX, sel: sel,
+      closeSel: function () { self.setState({ stockSel: null }); },
+      sfOpen: !!s.sfOpen, sfClosed: !s.sfOpen,
+      sfName: sf.name, sfAmount: sf.amount, sfPrice: sf.price, sfUnits: sfUnits,
+      sfValid: sfOk, sfInvalid: !sfOk,
+      openStockForm: function () { self.setState({ sfOpen: true, toast: "", sf: { name: "", amount: "", word: "pcs", price: "" } }); },
+      closeStockForm: function () { self.setState({ sfOpen: false }); },
+      setSfName: function (e) { setSf({ name: e && e.target ? e.target.value : "" }); },
+      setSfAmount: function (e) { setSf({ amount: e && e.target ? e.target.value : "" }); },
+      setSfPrice: function (e) { setSf({ price: e && e.target ? e.target.value : "" }); },
+      addToStock: function () {
+        if (!sfOk) return;
+        var name = String(sf.name).trim();
+        var item = { id: "s" + Date.now(), name: name, left: bnNum(sfAmountN) + " " + sf.word, qty: sfAmountN, word: sf.word, from: "Added manually", cents: Math.round(sfPriceN * 100) };
+        self.setState({ stock: (self.state.stock || []).concat([item]), sfOpen: false, toast: name + " added to stock" });
+      },
+      njClient: nj.client, njTitle: nj.title, njAddress: nj.address, njToday: !!nj.today,
+      njCheckBg: nj.today ? accent : "#FFFFFF", njCheckBd: nj.today ? accent : "#8A8F96",
+      njIsHourly: nj.mode !== "day", njIsDaily: nj.mode === "day",
+      njHourBg: nj.mode !== "day" ? "#16191D" : "transparent", njHourFg: nj.mode !== "day" ? "#FFFFFF" : "#374151",
+      njDayBg: nj.mode === "day" ? "#16191D" : "transparent", njDayFg: nj.mode === "day" ? "#FFFFFF" : "#374151",
+      njValid: njOk, njInvalid: !njOk,
+      openNewJob: function () { self.setState({ screen: "newjob", toast: "", nj: { client: "", title: "", address: "", today: true, mode: "hour" } }); },
+      setNjClient: function (e) { setNj({ client: e && e.target ? e.target.value : "" }); },
+      setNjTitle: function (e) { setNj({ title: e && e.target ? e.target.value : "" }); },
+      setNjAddress: function (e) { setNj({ address: e && e.target ? e.target.value : "" }); },
+      njToggleToday: function () { setNj({ today: !self.state.nj.today }); },
+      njHourly: function () { setNj({ mode: "hour" }); },
+      njDaily: function () { setNj({ mode: "day" }); },
+      createJob: function () {
+        if (!njOk) return;
+        var d = self.state.nj;
+        var client = String(d.client).trim();
+        var id = "j" + Date.now();
+        var job = { id: id, client: client, short: client.length > 12 ? client.slice(0, 11) + "…" : client, title: String(d.title).trim(), address: String(d.address).trim() || "No address yet", today: !!d.today };
+        var rec = Object.assign({}, self.state.receipts); rec[id] = [];
+        var h = Object.assign({}, self.state.hours); h[id] = 0;
+        var dd = Object.assign({}, self.state.days); dd[id] = 0;
+        var bl = Object.assign({}, self.state.billing); bl[id] = { mode: d.mode === "day" ? "day" : "hour" };
+        self.setState({
+          jobs: (self.state.jobs || BN_JOBS).concat([job]), receipts: rec, hours: h, days: dd, billing: bl,
+          screen: "job", jobId: id, sent: false, stockOpen: false, manualOpen: false,
+          toast: "New job for " + client + " created, also in Moneybird"
+        });
+      },
+      expCardSub: expCardSub, expTotal: bnFmt(expC), expVat: bnFmt(expVatC), expExcl: bnFmt(expC - expVatC),
+      expCountLabel: ledger.length + " receipts this quarter",
+      ledgerRows: ledgerRows, hasPending: pendingN > 0, allSent: pendingN === 0,
+      pendingLabel: pendingN === 1 ? "1 receipt not in Moneybird yet" : pendingN + " receipts not in Moneybird yet",
+      exported: !!s.exported, notExported: !s.exported,
+      exportLabel: "Export ready: CSV + " + ledger.length + " receipt photos for Q4",
+      exp: exp, expSent: curExp.status === "sent", expPending: curExp.status !== "sent",
+      openExpenses: function () { self.setState({ screen: "expenses", exported: false, toast: "" }); },
+      backToExpenses: function () { self.setState({ screen: "expenses" }); },
+      sendAll: function () { self.setState({ ledger: self.state.ledger.map(function (x) { return Object.assign({}, x, { status: "sent" }); }) }); },
+      sendOne: function () { self.setState({ ledger: self.state.ledger.map(function (x) { return x.id === curExp.id ? Object.assign({}, x, { status: "sent" }) : x; }) }); },
+      doExport: function () { self.setState({ exported: true }); },
+      processing: s.processing,
+
+      sample: sample, lines: lines, allChips: allChips, summary: summary,
+      ready: unplaced === 0 && overN === 0, notReady: unplaced > 0 || overN > 0,
+      unassignedLabel: overN ? "Fix items with too much assigned" : (unplaced === 1 ? "1 item still needs a place" : unplaced + " items still need a place"),
+      editOpen: ei !== null, ed: ed, editDone: editDone,
+      allSheetOpen: !!s.allSheet && ei === null,
+      openAllSheet: function () { self.setState({ allSheet: true }); },
+      closeAllSheet: function () { self.setState({ allSheet: false }); },
+      todoLines: todoLines, doneLines: doneLines, hasTodo: todoLines.length > 0, hasDone: doneLines.length > 0,
+      todoCount: String(todoLines.length), doneCount: String(doneLines.length),
+      unitQty: function () { setEditUnit("qty"); },
+      unitEur: function () { setEditUnit("eur"); },
+
+      jobs: jobs,
+      unbilledTotal: bnFmt(totSub), unbilledMat: bnFmt(totMat), unbilledLab: bnFmt(totLab),
+      unbilledJobsLabel: jobsOpen === 0 ? "All jobs invoiced" : (jobsOpen === 1 ? "1 job to invoice" : jobsOpen + " jobs to invoice"),
+      curToInvoice: bnFmt(curInv.sub), canInvoice: curInv.sub > 0, cannotInvoice: curInv.sub <= 0,
+      receiptCountLabel: count + " entries",
+      stockRows: stockRows, stockTotal: bnFmt(stockSum), stockEmpty: stock.length === 0, hasStock: stock.length > 0,
+      stockOpen: !!s.stockOpen,
+      manualOpen: !!s.manualOpen, manualToggleLabel: s.manualOpen ? "Hide" : "Add",
+      mName: s.mName || "", mPrice: s.mPrice || "", mQty: s.mQty ?? "1",
+      mTotal: bnFmt(mCents), mValid: mOk, mInvalid: !mOk,
+      toggleManual: function () { self.setState({ manualOpen: !self.state.manualOpen }); },
+      setMName: function (e) { self.setState({ mName: e && e.target ? e.target.value : "" }); },
+      setMPrice: function (e) { self.setState({ mPrice: e && e.target ? e.target.value : "" }); },
+      setMQty: function (e) { self.setState({ mQty: e && e.target ? e.target.value : "" }); },
+      addManual: function () {
+        if (!mOk) return;
+        var rec = Object.assign({}, self.state.receipts);
+        var name = String(self.state.mName).trim();
+        rec[curJob.id] = (rec[curJob.id] || []).map(function (r) { return Object.assign({}, r, { isNew: false }); })
+          .concat([{ id: "m" + Date.now(), store: "Added manually", date: "Today", detail: (mQtyN !== 1 ? bnNum(mQtyN) + " × " : "") + name, cents: mCents, isNew: true, manual: true }]);
+        self.setState({ receipts: rec, mName: "", mPrice: "", mQty: "1", manualOpen: false, jobSheet: null, toast: name + " added to " + curJob.client });
+      },
+      stockSummary: stock.length + (stock.length === 1 ? " item" : " items") + " in stock · " + bnFmt(stockSum),
+      stockToggleLabel: s.stockOpen ? "Hide" : "Show",
+      toggleStock: function () { self.setState({ stockOpen: !self.state.stockOpen }); },
+
+      curJob: curJob, curReceipts: curReceipts,
+      curCount: String(curRs.length), curTotal: bnFmt(curSum),
+      curCountLabel: curRs.length + (curRs.length === 1 ? " entry" : " entries"),
+      hasToast: !!s.toast, toast: s.toast,
+      invoiceLines: invoiceLines,
+      markupLabel: "Material markup " + markup + "%", markupAmt: bnFmt(markupC),
+      invSub: bnFmt(invSubC), invVat: bnFmt(invVatC), invTotal: bnFmt(invSubC + invVatC),
+      sent: s.sent, notSent: !s.sent,
+
+      curHoursLabel: bill.qtyLabel, curLabour: bnFmt(labourC),
+      hasLabour: curH > 0, noLabour: curH <= 0,
+      labourLabel: "Labour, " + bill.qtyLabel + " × " + bnFmt(rateC),
+      isHourly: hourly, isDaily: !hourly,
+      segHourBg: hourly ? "#16191D" : "transparent", segHourFg: hourly ? "#FFFFFF" : "#374151",
+      segDayBg: hourly ? "transparent" : "#16191D", segDayFg: hourly ? "#374151" : "#FFFFFF",
+      rateFieldLabel: hourly ? "Rate per hour" : "Rate per day",
+      rateText: bill.text,
+      qtyTitle: hourly ? "Hours worked" : "Days worked",
+      subLabel: hourly ? "−½ h" : "−½ day", subLabelLong: hourly ? "Remove half an hour" : "Remove half a day",
+      addHalfLabel: hourly ? "+½ h" : "+½ day", addHalfLabelLong: hourly ? "Add half an hour" : "Add half a day",
+      addOneLabel: hourly ? "+1 h" : "+1 day", addOneLabelLong: hourly ? "Add one hour" : "Add one day",
+      modeHour: function () { patchBill({ mode: "hour" }); },
+      modeDay: function () { patchBill({ mode: "day" }); },
+      setRateText: function (e) {
+        var v = e && e.target ? e.target.value : "";
+        patchBill(hourly ? { hourText: v } : { dayText: v });
+      },
+      addHalf: function () { setH(0.5); },
+      addHour: function () { setH(1); },
+      subHalf: function () { setH(-0.5); },
+
+      goHome: function () { self.setState({ screen: "home", toast: "", processing: false, editIdx: null, exported: false, stockSel: null, sfOpen: false, jobSheet: null }); },
+      startScan: function () { self.setState({ screen: "add", toast: "" }); },
+      shoot: function () {
+        if (self.state.processing) return;
+        self.setState({ processing: true });
+        if (self._t) clearTimeout(self._t);
+        self._t = setTimeout(function () { self.setState({ processing: false, screen: "result" }); }, 1700);
+      },
+      confirm: function () {
+        if (unplaced > 0 || overN > 0) return;
+        var rec = {};
+        Object.keys(self.state.receipts).forEach(function (k) {
+          rec[k] = self.state.receipts[k].map(function (r) { return Object.assign({}, r, { isNew: false }); });
+        });
+        var firstJob = null;
+        JOBS.forEach(function (j) {
+          var pj = perJob[j.id];
+          if (!pj) return;
+          if (!firstJob) firstJob = j.id;
+          var detail = pj.items + (pj.items === 1 ? " item" : " items") + (pj.partly ? ", " + pj.partly + " partly" : "");
+          var jl = [];
+          calc.forEach(function (c) {
+            c.rows.forEach(function (r, k) {
+              if (r.job !== j.id || !((r.qty || 0) > EPS)) return;
+              var extra = (c.rest === "client" && c.clientRow && c.clientRow === r) ? c.leftC : 0;
+              jl.push({ name: c.it.name, qty: r.qty < c.M - EPS ? bnNum(r2(r.qty)) + " of " + bnNum(c.M) + " " + c.it.word : "", cents: c.billed[k] + extra });
+            });
+          });
+          rec[j.id] = (rec[j.id] || []).concat([{ id: "n" + Date.now() + j.id, store: raw.store, date: "Today", detail: detail, cents: pj.cents, isNew: true, lines: jl }]);
+        });
+        var newStock = (self.state.stock || []).slice();
+        calc.forEach(function (c, i) {
+          if (c.leftC > 0 && c.rest === "stock") {
+            var hasJobs = c.rows.some(function (r) { return (r.qty || 0) > EPS; });
+            newStock.push({
+              id: "s" + Date.now() + i, name: c.it.name, from: raw.store, cents: c.leftC,
+              left: hasJobs ? bnNum(r2(c.left)) + " of " + bnNum(c.M) + " " + c.it.word : bnNum(c.M) + " " + c.it.word,
+              qty: hasJobs ? r2(c.left) : c.M, word: c.it.word
+            });
+          }
+        });
+        var parts = summary.map(function (r) { return r.amount + " " + r.label.replace(/^To /, "→ ").replace("Into stock", "→ stock").replace("Not billed (waste)", "waste"); });
+        var newLedger = (self.state.ledger || []).concat([{
+          id: "L" + Date.now(), store: raw.store, date: raw.when.split(" · ")[0], cat: "Materials", source: self.state.source || "Photo", cents: sTotal, status: "sent",
+          split: parts.join(" · "), items: lines.map(function (l) { return { short: l.short, price: l.price }; })
+        }]);
+        self.setState({
+          receipts: rec, stock: newStock, sent: false, ledger: newLedger, editIdx: null,
+          screen: firstJob ? "job" : "home", jobId: firstJob || self.state.jobId,
+          toast: "Saved: " + parts.join(", ") + ". Receipt sent to Moneybird.",
+          scanIdx: self.state.source === "Photo" ? self.state.scanIdx + 1 : self.state.scanIdx, assign: [],
+          inbox: (self.state.inbox || []).filter(function (x) { return x.id !== self.state.inboxId; }), inboxId: null
+        });
+      },
+      openInvoice: function () { self.setState({ screen: "invoice", sent: false }); },
+      backToJob: function () { self.setState({ screen: "job", toast: "" }); },
+      send: function () {
+        var rec = Object.assign({}, self.state.receipts);
+        rec[curJob.id] = (rec[curJob.id] || []).map(function (r) { return Object.assign({}, r, { billed: true, isNew: false }); });
+        var h = Object.assign({}, self.state.hours); h[curJob.id] = 0;
+        var d = Object.assign({}, self.state.days); d[curJob.id] = 0;
+        self.setState({
+          receipts: rec, hours: h, days: d, screen: "job", sent: false,
+          toast: "Invoice of " + bnFmt(invSubC + invVatC) + " for " + curJob.client + " is in Moneybird. Payment is handled there."
+        });
+      },
+      resetDemo: function () { self.setState(bnFreshState()); }
+    };
+  }
+}
+</script>
+</body>
+</html>
