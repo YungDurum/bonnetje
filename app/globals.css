@@ -1,0 +1,89 @@
+:root {
+  --orange: #c2410c; /* actions */
+  --green: #15803d; /* done */
+  --red: #b91c1c; /* errors */
+  --dark: #16191d; /* information cards only */
+  --to-place: #fffceb; /* item tiles still to place */
+  --bg: #eef0f2;
+  --surface: #ffffff;
+  --text: #16191d; /* 16:1 on white */
+  --muted: #565d66; /* >=6:1 on white, >=5:1 on --bg */
+  --border: #d5d9de;
+
+  --font-ui: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.mono,
+.amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 390px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  padding: 20px 16px 12px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.app-main {
+  flex: 1;
+  padding: 0 16px 24px;
+}
+
+.empty-state {
+  margin: 24px 0;
+  padding: 24px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (min-width: 391px) {
+  .app-shell {
+    box-shadow: 0 0 0 1px var(--border);
+  }
+}

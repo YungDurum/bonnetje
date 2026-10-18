@@ -1,4 +1,22 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# env (keep .env.example)
 .env.local
 .env*.local
-node_modules/
-.next/
+
+# tests
+playwright-report/
+test-results/
+coverage/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+.DS_Store
+npm-debug.log*

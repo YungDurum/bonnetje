@@ -20,7 +20,7 @@ segmented switch may stay dark.
 - Bookkeeping: Moneybird API (receipts, sales invoices, contacts, projects).
 - Tests: Vitest for logic, Playwright for the main flows.
 
-Fill in once the project exists:
+Commands:
 - Install: `npm install`
 - Dev: `npm run dev`
 - Tests: `npm test` (unit) · `npm run test:e2e` (flows)
