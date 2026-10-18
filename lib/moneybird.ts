@@ -181,8 +181,18 @@ export class HttpMoneybird implements Moneybird {
   }
 }
 
-/** The configured client, or null when MONEYBIRD_TOKEN / MONEYBIRD_ADMINISTRATION_ID are not set. */
-export function getMoneybird(): Moneybird | null {
+const g = globalThis as unknown as { __bonnetjeFakeMoneybird?: Moneybird };
+
+/**
+ * The configured client, or null when MONEYBIRD_TOKEN / MONEYBIRD_ADMINISTRATION_ID are not set.
+ * BONNETJE_FAKE_MONEYBIRD=1 (end-to-end tests only) gives an in-memory stand-in instead.
+ */
+export async function getMoneybird(): Promise<Moneybird | null> {
+  if (process.env.BONNETJE_FAKE_MONEYBIRD === "1") {
+    if (process.env.NODE_ENV === "production") throw new Error("BONNETJE_FAKE_MONEYBIRD is for tests only");
+    const { FakeMoneybird } = await import("./moneybird-fake");
+    return (g.__bonnetjeFakeMoneybird ??= new FakeMoneybird());
+  }
   const token = process.env.MONEYBIRD_TOKEN;
   const admin = process.env.MONEYBIRD_ADMINISTRATION_ID;
   return token && admin ? new HttpMoneybird(token, admin) : null;

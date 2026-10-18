@@ -4,34 +4,14 @@ import { openInvoice, sendJobInvoice, sendReceipt } from "../db/invoices";
 import { createJob, getJob, setLabour } from "../db/jobs";
 import { createReceipt, getReceipt, saveReceiptPlacement, toPlaceLines } from "../db/receipts";
 import { buildInvoice } from "../invoice";
-import { HttpMoneybird, MoneybirdError, moneybirdPrice, type Moneybird, type MoneybirdLine } from "../moneybird";
+import { HttpMoneybird, moneybirdPrice, type MoneybirdLine } from "../moneybird";
+import { FakeMoneybird } from "../moneybird-fake";
 import { wholeLineChoice } from "../placement";
 import { SAMPLE_RECEIPTS } from "../samples";
 
 const DE_VRIES = "10000000-0000-0000-0000-000000000001";
 const BAKKER = "10000000-0000-0000-0000-000000000002";
 const JANSEN = "10000000-0000-0000-0000-000000000003";
-
-/** Stand-in for Moneybird in tests: records calls, can be told to fail a step. */
-class FakeMoneybird implements Moneybird {
-  calls: { op: string; arg: unknown }[] = [];
-  failOn = new Set<string>();
-  private n = 0;
-  private step(op: string, arg: unknown) {
-    this.calls.push({ op, arg });
-    if (this.failOn.has(op)) throw new MoneybirdError(`${op} failed`, 500);
-    return { id: `mb-${op}-${++this.n}` };
-  }
-  async createContact(c: { companyName: string; address: string }) { return this.step("contact", c); }
-  async createProject(p: { name: string }) { return this.step("project", p); }
-  async createSalesInvoice(i: { contactId: string; projectId: string | null; reference: string; lines: MoneybirdLine[] }) {
-    return this.step("invoice", i);
-  }
-  async sendSalesInvoice(id: string) { this.step("send", id); }
-  async createReceipt(r: { reference: string; date: string; lines: MoneybirdLine[] }) { return this.step("receipt", r); }
-  async addReceiptAttachment(id: string, f: { name: string }) { this.step("attach", { id, name: f.name }); }
-  ops() { return this.calls.map((c) => c.op); }
-}
 
 describe("buildInvoice", () => {
   it("de Vries: lines excl. VAT add up to To invoice; VAT 21% on the subtotal", async () => {
