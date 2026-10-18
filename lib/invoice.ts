@@ -34,7 +34,7 @@ function entryLabel(e: InvoiceEntry): string {
   return `Materials — ${what}`;
 }
 
-export function labourLine(labour: Labour, labourCents: Cents): string {
+export function labourLine(labour: Labour): string {
   const rate = labour.mode === "hour" ? labour.hourRateCents : labour.dayRateCents;
   const half = labour.mode === "hour" ? labour.hoursHalf : labour.daysHalf;
   return `Labour, ${formatHalf(half, labour.mode)} × ${formatEuro(rate)}`;
@@ -53,7 +53,7 @@ export function buildInvoice(
   const open = entries.filter((e) => !e.billed).sort((a, b) => a.date.localeCompare(b.date));
   const lines: InvoiceLine[] = open.map((e) => ({ description: entryLabel(e), exclCents: entryExcl(e) }));
   if (toInvoice.markup > 0) lines.push({ description: `Material markup ${markupPct}%`, exclCents: toInvoice.markup });
-  if (toInvoice.labour > 0) lines.push({ description: labourLine(labour, toInvoice.labour), exclCents: toInvoice.labour });
+  if (toInvoice.labour > 0) lines.push({ description: labourLine(labour), exclCents: toInvoice.labour });
 
   const sum = lines.reduce((a, l) => a + l.exclCents, 0);
   if (sum !== toInvoice.total) {

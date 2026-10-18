@@ -1265,3 +1265,192 @@ a.btn {
   background: #fff;
   border-top: 1px solid var(--line-soft);
 }
+
+/* ---------- stock ---------- */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #fff;
+  color: var(--muted);
+}
+
+.search-box:focus-within {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.stock-row {
+  width: 100%;
+  min-height: 56px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 13px 14px 13px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stock-row:last-child {
+  border-bottom: 0;
+}
+
+.chip-pick {
+  border-style: solid;
+  border-color: var(--field-border);
+}
+
+/* A chosen option is a selection, not an action: dark, like the segmented switches. */
+.chip-pick[aria-pressed="true"] {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: #fff;
+}
+
+.unit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.unit-chips .chip {
+  padding: 0 14px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.left-text-sm {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.left-text-sm.left-text-over {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.sheet-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sheet-divider {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-box {
+  background: #fff3eb;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-text {
+  margin: 0;
+  font-size: 14px;
+  color: #7c2d12;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-actions .btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-danger-outline {
+  border: 1px solid var(--red);
+  background: #fff;
+  color: var(--red);
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.sheet-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: var(--muted-strong);
+}
+
+.menu-btn .source-text {
+  flex: 1;
+}
+
+.menu-btn .source-sub {
+  color: var(--muted);
+}
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.pick-item:last-child {
+  border-bottom: 0;
+}
+
+.pick-item .btn-outline {
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  flex: none;
+}
+
+a.source-btn {
+  text-decoration: none;
+}

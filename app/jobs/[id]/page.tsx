@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db/client";
+import { listStock } from "@/lib/db/stock";
 import { getJob, type MaterialEntry } from "@/lib/db/jobs";
 import { formatDay, formatEuro } from "@/lib/format";
 import { Toast } from "../../_components/Toast";
 import { BackLink } from "../../_components/BackLink";
-import { InvoiceIcon, PlusIcon } from "../../_components/icons";
+import { InvoiceIcon } from "../../_components/icons";
+import { AddMaterial } from "./AddMaterial";
 import { InvoicedSection } from "./InvoicedSection";
 import { LabourSection } from "./LabourSection";
 import { MaterialRow, type RowData } from "./MaterialRow";
@@ -37,8 +39,18 @@ export default async function JobPage({
 }) {
   const { id } = await params;
   const { saved } = await searchParams;
-  const job = await getJob(await getDb(), id);
+  const db = await getDb();
+  const job = await getJob(db, id);
   if (!job) notFound();
+  const stock = (await listStock(db)).map((i) => ({
+    id: i.id,
+    name: i.name,
+    qty: i.qty,
+    unit: i.unit,
+    originalQty: i.originalQty,
+    valueCents: i.valueCents,
+    origin: i.origin,
+  }));
 
   const openRows = job.open.map(toRow);
   const billedRows = job.billed.map(toRow);
@@ -75,13 +87,7 @@ export default async function JobPage({
               <MaterialRow key={r.id} row={r} expandable={r.expandable} />
             ))}
             {openRows.length === 0 ? <div className="list-empty">No open materials on this job.</div> : null}
-            <div className="add-material">
-              <button type="button" className="add-btn" disabled>
-                <PlusIcon size={16} />
-                Add material
-              </button>
-              <span className="add-note">Adding materials is coming in a later step.</span>
-            </div>
+            <AddMaterial jobId={job.id} client={job.client} stock={stock} />
           </div>
         </section>
 
