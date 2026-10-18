@@ -92,7 +92,7 @@ const SAMPLES: Sample[] = [
   },
   {
     file: "04-schroeven-onbekend.jpg",
-    note: "Measures not on the receipt (assorted box, plugs): must come back as unknown. Dim, tilted photo.",
+    note: "Assorted screws have no count on the receipt: measure must come back unknown. Plugs are 2 boxes. Dim, tilted photo.",
     layout: "thermal",
     supplier: "Doe-Het-Zelf Centrum Noord",
     address: ["Zuiderkade 88", "1013 AB Amsterdam"],
@@ -102,7 +102,7 @@ const SAMPLES: Sample[] = [
     lines: [
       { print: "SCHROEVEN ASSORTIMENT", qty: 1, unitCents: 1295, vat: 21, measure: null, unit: null },
       { print: "SANITAIRKIT WIT", qty: 1, unitCents: 695, vat: 21, measure: 1, unit: "pcs" },
-      { print: "PLUGGEN DOOS", qty: 2, unitCents: 449, vat: 21, measure: null, unit: null },
+      { print: "PLUGGEN DOOS", qty: 2, unitCents: 449, vat: 21, measure: 2, unit: "boxes" },
     ],
   },
   {

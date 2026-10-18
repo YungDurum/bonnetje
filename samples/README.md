@@ -11,8 +11,9 @@ CLAUDE.md ("Receipt extraction"), with prices incl. VAT, plus:
 - `note`: what the sample tests.
 
 `measure`/`unit` follow one rule: a measure is given only when the receipt states it
-(a count bought per piece, a pack size like "200ST", or a size like "25KG" or "4M" times the
-quantity). Anything else, or a unit Bonnetje doesn't have (m²), is `null`.
+(a count bought per piece, a number of boxes for items sold per box ("DOOS"), a pack size like
+"200ST", or a size like "25KG" or "4M" times the quantity). Anything else (an assortment, shipping)
+or a unit Bonnetje doesn't have (m²) is `null`.
 
 | File | Tests |
 | --- | --- |

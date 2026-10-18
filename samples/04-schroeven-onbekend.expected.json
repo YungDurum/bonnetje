@@ -1,5 +1,5 @@
 {
-  "note": "Measures not on the receipt (assorted box, plugs): must come back as unknown. Dim, tilted photo.",
+  "note": "Assorted screws have no count on the receipt: measure must come back unknown. Plugs are 2 boxes. Dim, tilted photo.",
   "supplier": "Doe-Het-Zelf Centrum Noord",
   "date": "2026-10-17",
   "totalCents": 2888,
@@ -28,8 +28,8 @@
       "qty": 2,
       "unitPriceCents": 449,
       "lineTotalCents": 898,
-      "measure": null,
-      "unit": null,
+      "measure": 2,
+      "unit": "boxes",
       "vatRate": 21
     }
   ]
