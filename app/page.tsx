@@ -3,7 +3,8 @@ import { getDb } from "@/lib/db/client";
 import { homeTotals, listJobs, type JobSummary } from "@/lib/db/jobs";
 import { getOverview } from "@/lib/db/overview";
 import { formatEuro, formatHalf } from "@/lib/format";
-import { ChartIcon, CheckIcon, PinIcon, PlusIcon, TruckIcon } from "./_components/icons";
+import { Toast } from "./_components/Toast";
+import { CameraIcon, ChartIcon, CheckIcon, PinIcon, PlusIcon, TruckIcon } from "./_components/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,8 @@ function JobCard({ job }: { job: JobSummary }) {
   );
 }
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ saved?: string | string[] }> }) {
+  const { saved } = await searchParams;
   const db = await getDb();
   const [jobs, overview] = await Promise.all([listJobs(db), getOverview(db)]);
   const totals = homeTotals(jobs);
@@ -53,6 +55,8 @@ export default async function Home() {
         <h1 className="brand">
           bonnetje<span className="brand-dot">.</span>
         </h1>
+
+        <Toast text={saved} />
 
         <section className="info-card info-card-lg" aria-label="Not invoiced yet">
           <div className="info-label">Not invoiced yet</div>
@@ -98,6 +102,13 @@ export default async function Home() {
             </span>
           </Link>
         </div>
+      </div>
+
+      <div className="bottom-bar bottom-bar-sticky">
+        <Link href="/receipts/new" className="btn btn-primary btn-lg btn-icon">
+          <CameraIcon size={22} />
+          Add receipt
+        </Link>
       </div>
     </main>
   );

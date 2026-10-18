@@ -264,7 +264,10 @@ a {
   color: #fff;
 }
 
+/* A disabled action must not look tappable. */
 .btn-primary:disabled {
+  background: var(--disabled-bg);
+  color: var(--muted);
   cursor: not-allowed;
 }
 
@@ -932,4 +935,333 @@ button.row-head {
   .app-shell {
     box-shadow: 0 0 0 1px var(--border);
   }
+}
+
+/* ---------- toast, notices ---------- */
+.toast {
+  background: #dcfce7;
+  color: #14532d;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notice-error {
+  background: #fee2e2;
+  color: var(--red);
+  border: 1px solid #e8a3a3;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.btn-lg {
+  min-height: 58px;
+  font-size: 17px;
+  text-decoration: none;
+}
+
+a.btn {
+  text-decoration: none;
+}
+
+.btn-outline[href] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ---------- add receipt ---------- */
+.source-btn {
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 44px;
+}
+
+.source-btn:disabled {
+  background: var(--line-soft);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.source-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.source-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.source-sub {
+  font-size: 13px;
+}
+
+/* ---------- where did it go ---------- */
+.all-btn {
+  width: 100%;
+  min-height: 56px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.all-btn-text {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title-strong {
+  color: var(--muted-strong);
+}
+
+.todo-tile {
+  width: 100%;
+  text-align: left;
+  background: var(--to-place);
+  border: 2px dashed #e3d28a;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(22, 25, 29, 0.05);
+}
+
+.todo-tile-over {
+  background: #fff7f7;
+  border: 2px solid #e8a3a3;
+}
+
+.todo-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.todo-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.todo-price {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.todo-sub {
+  font-size: 13px;
+  color: var(--muted-strong);
+}
+
+.pill {
+  align-self: flex-start;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #fff3eb;
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pill-over {
+  background: #fee2e2;
+  color: var(--red);
+}
+
+.placed-row {
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+}
+
+.placed-check {
+  color: var(--green);
+  display: flex;
+}
+
+.pick-row {
+  border-bottom: 1px solid var(--line-soft);
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--muted-strong);
+}
+
+.summary-row .amount {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ---------- split editor ---------- */
+.stack-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.split-row {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 2px 10px 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.split-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.split-client {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.split-row-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.split-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border-radius: 12px;
+  border-color: var(--field-border);
+}
+
+.split-input .input-bare {
+  font-size: 18px;
+}
+
+.step-btn {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.split-equiv {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted-strong);
+}
+
+.chip-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted-strong);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px dashed #8a8f96;
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.left-box {
+  background: #f3f4f6;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.left-text {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.left-text-over {
+  color: var(--red);
+}
+
+.sheet-foot {
+  position: sticky;
+  bottom: 0;
+  margin-bottom: -26px;
+  padding: 10px 0 26px;
+  background: #fff;
+  border-top: 1px solid var(--line-soft);
 }

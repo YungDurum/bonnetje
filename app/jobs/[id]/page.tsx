@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { getJob, type MaterialEntry } from "@/lib/db/jobs";
 import { formatDay, formatEuro } from "@/lib/format";
+import { Toast } from "../../_components/Toast";
 import { BackLink } from "../../_components/BackLink";
 import { InvoiceIcon, PlusIcon } from "../../_components/icons";
 import { InvoicedSection } from "./InvoicedSection";
@@ -27,8 +28,15 @@ function toRow(e: MaterialEntry): RowData & { expandable: boolean } {
   };
 }
 
-export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function JobPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string | string[] }>;
+}) {
   const { id } = await params;
+  const { saved } = await searchParams;
   const job = await getJob(await getDb(), id);
   if (!job) notFound();
 
@@ -47,6 +55,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
       </header>
 
       <div className="screen-body">
+        <Toast text={saved} />
         <section className="info-card" aria-label="To invoice">
           <span className="info-label">To invoice</span>
           <span className="amount info-total info-total-sm">{formatEuro(t.total)}</span>

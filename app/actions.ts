@@ -3,8 +3,11 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db/client";
-import { createJob, setLabour } from "@/lib/db/jobs";
-import { parseEuroInput } from "@/lib/format";
+import { createJob, listJobs, setLabour } from "@/lib/db/jobs";
+import { createReceipt, PlacementError, saveReceiptPlacement } from "@/lib/db/receipts";
+import { formatEuro, parseEuroInput } from "@/lib/format";
+import type { LineChoice } from "@/lib/placement";
+import { SAMPLE_RECEIPTS } from "@/lib/samples";
 
 export type NewJobState = { error?: string; field?: "client" | "title" | "rate" };
 
@@ -48,4 +51,60 @@ export async function setLabourAction(input: LabourInput): Promise<LabourResult>
   revalidatePath("/");
   revalidatePath(`/jobs/${jobId}`);
   return { ok: true };
+}
+
+/** Demo: create one of the sample receipts and open it on "Where did it go?". */
+export async function createSampleReceiptAction(index: number): Promise<void> {
+  const sample = Number.isInteger(index) ? SAMPLE_RECEIPTS[index] : undefined;
+  if (!sample) redirect("/receipts/new");
+  const id = await createReceipt(await getDb(), sample);
+  redirect(`/receipts/${id}`);
+}
+
+export type SaveReceiptResult = { ok: false; error: string };
+
+function validChoices(choices: unknown): choices is LineChoice[] {
+  return (
+    Array.isArray(choices) &&
+    choices.every(
+      (c) =>
+        c &&
+        ["measure", "part", "euro"].includes(c.kind) &&
+        ["stock", "client", "waste"].includes(c.leftover) &&
+        typeof c.placed === "boolean" &&
+        Array.isArray(c.rows) &&
+        c.rows.every(
+          (r: { jobId?: unknown; value?: unknown }) =>
+            typeof r?.jobId === "string" &&
+            typeof r.value === "number" &&
+            Number.isFinite(r.value) &&
+            r.value >= 0 &&
+            r.value < 1e9,
+        ),
+    )
+  );
+}
+
+/** Save "Where did it go?": the server recomputes everything; then go to the first job with a "Saved" message. */
+export async function saveReceiptAction(receiptId: string, choices: LineChoice[]): Promise<SaveReceiptResult> {
+  if (!validChoices(choices)) return { ok: false, error: "Something is wrong with the split. Reload and try again." };
+  const db = await getDb();
+  let target: string;
+  try {
+    const p = await saveReceiptPlacement(db, receiptId, choices);
+    const clients = new Map((await listJobs(db)).map((j) => [j.id, j.client]));
+    const parts = p.jobs.map((j) => `${formatEuro(j.cents)} → ${clients.get(j.jobId) ?? "job"}`);
+    if (p.stockCents > 0) parts.push(`${formatEuro(p.stockCents)} → stock`);
+    if (p.wasteCents > 0) parts.push(`${formatEuro(p.wasteCents)} waste`);
+    const saved = `Saved: ${parts.join(", ") || "nothing to bill"}.`;
+    revalidatePath("/");
+    revalidatePath("/stock");
+    revalidatePath("/expenses");
+    for (const j of p.jobs) revalidatePath(`/jobs/${j.jobId}`);
+    target = `${p.jobs[0] ? `/jobs/${p.jobs[0].jobId}` : "/"}?${new URLSearchParams({ saved })}`;
+  } catch (e) {
+    if (e instanceof PlacementError) return { ok: false, error: e.message };
+    return { ok: false, error: "Could not save the receipt. Try again." };
+  }
+  redirect(target);
 }
