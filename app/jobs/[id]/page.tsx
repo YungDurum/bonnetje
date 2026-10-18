@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getDb } from "@/lib/db/client";
+import { openInvoice } from "@/lib/db/invoices";
 import { listStock } from "@/lib/db/stock";
 import { getJob, type MaterialEntry } from "@/lib/db/jobs";
 import { formatDay, formatEuro } from "@/lib/format";
@@ -52,6 +54,7 @@ export default async function JobPage({
     origin: i.origin,
   }));
 
+  const unsent = await openInvoice(db, id);
   const openRows = job.open.map(toRow);
   const billedRows = job.billed.map(toRow);
   const t = job.toInvoice;
@@ -97,17 +100,17 @@ export default async function JobPage({
       </div>
 
       <div className="bottom-bar bottom-bar-sticky">
-        {t.total > 0 ? (
-          <button type="button" className="btn btn-primary btn-icon" disabled title="Coming soon">
+        {t.total > 0 || unsent ? (
+          <Link href={`/jobs/${job.id}/invoice`} className="btn btn-primary btn-icon">
             <InvoiceIcon />
-            Create invoice · {formatEuro(t.total)}
-          </button>
+            Create invoice · {formatEuro(unsent ? unsent.totalCents : t.total)}
+          </Link>
         ) : (
           <button type="button" className="btn btn-disabled" disabled>
             Nothing to invoice yet
           </button>
         )}
-        {t.total > 0 ? <p className="add-note center">Creating the invoice is coming in a later step.</p> : null}
+        {unsent ? <p className="job-warn">Invoice not sent</p> : null}
       </div>
     </main>
   );

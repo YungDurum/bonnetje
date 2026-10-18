@@ -5,6 +5,10 @@ import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db/client";
 import { createJob, listJobs, setLabour } from "@/lib/db/jobs";
 import { createReceipt, PlacementError, saveReceiptPlacement } from "@/lib/db/receipts";
+import { ensureMoneybirdJob, sendJobInvoice, sendReceipt } from "@/lib/db/invoices";
+import { readStoredFile } from "@/lib/files";
+import { NOT_CONNECTED } from "@/lib/invoice-view";
+import { getMoneybird } from "@/lib/moneybird";
 import { addManualMaterial, addStock, putStockOnJob, removeStock, StockError } from "@/lib/db/stock";
 import { formatEuro, parseEuroInput } from "@/lib/format";
 import type { Unit } from "@/lib/money";
@@ -33,6 +37,13 @@ export async function createJobAction(_prev: NewJobState, formData: FormData): P
     id = await createJob(db, { client, title, address, mode, rateCents });
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Could not create the job." };
+  }
+  // A job is a contact + project in Moneybird. If this fails it is retried when invoicing.
+  try {
+    const mb = await getMoneybird();
+    if (mb) await ensureMoneybirdJob(db, mb, id);
+  } catch {
+    // never block creating the job
   }
   revalidatePath("/");
   redirect(`/jobs/${id}`);
@@ -99,7 +110,14 @@ export async function saveReceiptAction(receiptId: string, choices: LineChoice[]
     const parts = p.jobs.map((j) => `${formatEuro(j.cents)} → ${clients.get(j.jobId) ?? "job"}`);
     if (p.stockCents > 0) parts.push(`${formatEuro(p.stockCents)} → stock`);
     if (p.wasteCents > 0) parts.push(`${formatEuro(p.wasteCents)} waste`);
-    const saved = `Saved: ${parts.join(", ") || "nothing to bill"}.`;
+    let sent = false;
+    try {
+      const mb = await getMoneybird();
+      if (mb) sent = (await sendReceipt(db, mb, receiptId, readStoredFile)).ok;
+    } catch {
+      // the receipt stays 'pending'; it can be sent again from the receipt page
+    }
+    const saved = `Saved: ${parts.join(", ") || "nothing to bill"}.${sent ? " Receipt sent to Moneybird." : ""}`;
     revalidatePath("/");
     revalidatePath("/stock");
     revalidatePath("/expenses");
@@ -110,6 +128,44 @@ export async function saveReceiptAction(receiptId: string, choices: LineChoice[]
     return { ok: false, error: "Could not save the receipt. Try again." };
   }
   redirect(target);
+}
+
+// ---------- Moneybird ----------
+
+export type MoneybirdResult = { ok: true } | { ok: false; error: string };
+
+/** Send the job's invoice to Moneybird; on success go to the confirmation. */
+export async function sendInvoiceAction(jobId: string): Promise<MoneybirdResult> {
+  if (!isId(jobId)) return { ok: false, error: "Job not found" };
+  let mb;
+  try {
+    mb = await getMoneybird();
+  } catch {
+    return { ok: false, error: "Could not reach Moneybird. Try again." };
+  }
+  if (!mb) return { ok: false, error: NOT_CONNECTED };
+  const r = await sendJobInvoice(await getDb(), mb, jobId);
+  revalidatePath("/");
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath(`/jobs/${jobId}/invoice`);
+  if (!r.ok) return { ok: false, error: r.error };
+  redirect(`/jobs/${jobId}/invoice?sent=1`);
+}
+
+/** Send a saved receipt to Moneybird again. */
+export async function sendReceiptAction(receiptId: string): Promise<MoneybirdResult> {
+  if (!isId(receiptId)) return { ok: false, error: "Receipt not found" };
+  let mb;
+  try {
+    mb = await getMoneybird();
+  } catch {
+    return { ok: false, error: "Could not reach Moneybird. Try again." };
+  }
+  if (!mb) return { ok: false, error: NOT_CONNECTED };
+  const r = await sendReceipt(await getDb(), mb, receiptId, readStoredFile);
+  revalidatePath(`/receipts/${receiptId}`);
+  revalidatePath("/expenses");
+  return r;
 }
 
 // ---------- stock ----------

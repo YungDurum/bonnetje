@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db/client";
 import { listJobs } from "@/lib/db/jobs";
 import { getReceipt } from "@/lib/db/receipts";
+import { receiptMoneybirdError } from "@/lib/db/moneybird-status";
+import { getMoneybird } from "@/lib/moneybird";
 import { formatDay, formatEuro } from "@/lib/format";
 import { BackLink } from "../../_components/BackLink";
 import { CircleCheckIcon } from "../../_components/icons";
+import { MoneybirdStatus } from "./MoneybirdStatus";
 import { ReceiptPlacer } from "./ReceiptPlacer";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +19,8 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const receipt = await getReceipt(db, id);
   if (!receipt) notFound();
   const jobs = await listJobs(db);
+  const mbError = receipt.placed ? await receiptMoneybirdError(db, id) : null;
+  const connected = receipt.placed ? (await getMoneybird().catch(() => null)) !== null : false;
 
   return (
     <main className="screen">
@@ -37,6 +42,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
             <span>This receipt is saved.</span>
           </div>
           <p className="note">Every item has a place, so it can&apos;t be changed here any more.</p>
+          <MoneybirdStatus
+            receiptId={receipt.id}
+            sent={receipt.moneybirdStatus === "sent"}
+            error={mbError}
+            connected={connected}
+          />
           <Link href="/" className="btn btn-outline">
             Back to home
           </Link>

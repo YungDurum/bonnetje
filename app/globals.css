@@ -1454,3 +1454,113 @@ a.btn {
 a.source-btn {
   text-decoration: none;
 }
+
+/* ---------- invoice ---------- */
+.invoice-body {
+  padding-bottom: 16px;
+}
+
+.invoice-sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 6px 20px rgba(22, 25, 29, 0.08);
+}
+
+.invoice-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.invoice-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.invoice-bill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--muted-strong);
+}
+
+.invoice-bill strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.invoice-lines,
+.invoice-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+}
+
+.invoice-totals {
+  gap: 6px;
+  font-size: 14px;
+  border-top-color: var(--line);
+}
+
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.invoice-row .amount {
+  white-space: nowrap;
+}
+
+.invoice-row-muted {
+  color: var(--muted);
+}
+
+.invoice-total {
+  font-size: 18px;
+  font-weight: 800;
+  padding-top: 4px;
+}
+
+.invoice-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.job-warn {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+  text-align: center;
+}
+
+.moneybird-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.moneybird-row .btn {
+  min-height: 48px;
+}
+
+.invoice-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
