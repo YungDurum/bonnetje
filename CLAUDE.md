@@ -25,6 +25,7 @@ Commands:
 - Dev: `npm run dev`
 - Tests: `npm test` (unit) · `npm run test:e2e` (flows)
 - Lint/types: `npm run lint` · `npm run typecheck`
+- Database: `npm run db:check` (migrations + seed in memory, no Docker) · `npm run db:reset` (local Supabase, needs the Supabase CLI + Docker)
 
 ## Environment
 Secrets live in `.env.local` (never commit it): `ANTHROPIC_API_KEY`, `MONEYBIRD_TOKEN`,
@@ -49,8 +50,10 @@ Use a Moneybird **test administration** during development.
 - All amounts are **integer cents**. Never use floats for money in storage.
 - Receipt prices are **incl. VAT**. Excl. VAT = `round(cents / 1.21)` for 21% lines.
   Keep the VAT rate per line (21% default, 9% exists) — don't hard-code 21% beyond the demo.
-- Splitting a line: part cents = `round(lineCents × usedAmount / totalAmount)`;
-  the leftover is `lineCents − sum(parts)` so the parts always add up to the line exactly.
+- Splitting a line: part cents = `round(lineCents × usedAmount / totalAmount)`, applied to the
+  running total (part i = rounded total up to i − rounded total before i) so the parts never add up
+  to more than the line and a fully assigned line has no stray cent. The leftover is
+  `lineCents − sum(parts)`, so parts + leftover always equal the line exactly. See `lib/money.ts`.
 - Assigning more than 100% of a line is an error; the user must fix it before saving.
 - **To invoice (per job)** = unbilled materials excl. VAT + markup % on those materials
   + labour (hours × hourly rate, or days × day rate). Show it excl. VAT.
