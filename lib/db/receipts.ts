@@ -1,4 +1,5 @@
 // Receipts: create one (from a reader or a demo sample), load it for "Where did it go?",
+// correct it on "Check receipt" when it doesn't add up,
 // and save the placement — material entries, stock and allocations — in one transaction.
 import type { Cents, Unit, VatRate } from "../money";
 import { computePlacement, type LineChoice, type PlaceLine, type Placement } from "../placement";
@@ -23,6 +24,8 @@ export type NewReceipt = {
   source: ReceiptSource;
   totalCents: Cents;
   filePath?: string | null;
+  /** The reader noticed something else that needs a person (e.g. qty × price ≠ line total). */
+  needsReview?: boolean;
   lines: NewReceiptLine[];
 };
 
@@ -35,6 +38,8 @@ export type Receipt = {
   source: ReceiptSource;
   totalCents: Cents;
   needsReview: boolean;
+  /** Key of the original file in the file store (lib/files.ts), if there is one. */
+  filePath: string | null;
   moneybirdStatus: "sent" | "pending";
   /** Every line placed: the receipt has been saved. */
   placed: boolean;
@@ -47,7 +52,7 @@ export async function createReceipt(db: Db, r: NewReceipt): Promise<string> {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date)) throw new Error("Date must be YYYY-MM-DD");
   if (!r.lines.length) throw new Error("A receipt needs at least one line");
   const sum = r.lines.reduce((a, l) => a + l.lineCents, 0);
-  const needsReview = sum !== r.totalCents;
+  const needsReview = sum !== r.totalCents || !!r.needsReview;
   return db.transaction(async (tx) => {
     const [{ id }] = await tx.query<{ id: string }>(
       `insert into receipts (supplier, receipt_date, source, total_cents, file_path, needs_review)
@@ -71,6 +76,7 @@ type ReceiptRow = {
   receipt_date: string;
   source: ReceiptSource;
   total_cents: number;
+  file_path: string | null;
   needs_review: boolean;
   moneybird_status: "sent" | "pending";
 };
@@ -92,7 +98,7 @@ type LineRow = {
 export async function getReceipt(db: Queryable, id: string): Promise<Receipt | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
   const [r] = await db.query<ReceiptRow>(
-    `select id, supplier, receipt_date, source, total_cents, needs_review, moneybird_status from receipts where id = $1`,
+    `select id, supplier, receipt_date, source, total_cents, file_path, needs_review, moneybird_status from receipts where id = $1`,
     [id],
   );
   if (!r) return null;
@@ -108,6 +114,7 @@ export async function getReceipt(db: Queryable, id: string): Promise<Receipt | n
     source: r.source,
     totalCents: r.total_cents,
     needsReview: r.needs_review,
+    filePath: r.file_path,
     moneybirdStatus: r.moneybird_status,
     placed: lines.length > 0 && lines.every((l) => l.placed),
     lines: lines.map((l) => ({
@@ -138,6 +145,69 @@ export function toPlaceLines(r: Receipt): PlaceLine[] {
 }
 
 export class PlacementError extends Error {}
+
+export class ReceiptEditError extends Error {}
+
+/** A line on "Check receipt": an existing line (with id) or a new one the photo didn't show. */
+export type EditedLine = { id?: string; name: string; lineCents: Cents };
+
+/**
+ * Save "Check receipt": the user's corrected names, line totals and receipt total.
+ * Lines left out are removed; new lines get qty 1, unknown measure and 21% VAT.
+ * The receipt needs review until its lines add up to the total.
+ */
+export async function updateReceiptLines(
+  db: Db,
+  receiptId: string,
+  edit: { totalCents: Cents; lines: EditedLine[] },
+): Promise<{ needsReview: boolean }> {
+  const isCents = (c: unknown) => Number.isSafeInteger(c) && (c as number) >= 0;
+  if (!isCents(edit.totalCents)) throw new ReceiptEditError("The receipt total must be an amount of 0 or more");
+  if (!edit.lines.length) throw new ReceiptEditError("A receipt needs at least one line");
+  for (const l of edit.lines) {
+    if (!l.name.trim()) throw new ReceiptEditError("Every line needs a name");
+    if (!isCents(l.lineCents)) throw new ReceiptEditError("Every line needs an amount of 0 or more");
+  }
+  return db.transaction(async (tx) => {
+    const [locked] = await tx.query<{ id: string }>("select id from receipts where id = $1 for update", [receiptId]);
+    if (!locked) throw new ReceiptEditError("Receipt not found");
+    const current = await tx.query<{ id: string; qty: number; line_cents: number; placed: boolean }>(
+      "select id, qty, line_cents, placed from receipt_lines where receipt_id = $1",
+      [receiptId],
+    );
+    if (current.some((l) => l.placed)) throw new ReceiptEditError("This receipt has already been saved");
+    const byId = new Map(current.map((l) => [l.id, l]));
+    const kept = new Set(edit.lines.flatMap((l) => (l.id ? [l.id] : [])));
+    for (const id of kept) if (!byId.has(id)) throw new ReceiptEditError("A line on this receipt no longer exists");
+    if (kept.size !== edit.lines.filter((l) => l.id).length) throw new ReceiptEditError("A line appears twice");
+
+    for (const l of current) {
+      if (!kept.has(l.id)) await tx.query("delete from receipt_lines where id = $1", [l.id]);
+    }
+    // move positions out of the way first: (receipt_id, position) is unique
+    await tx.query("update receipt_lines set position = -position where receipt_id = $1", [receiptId]);
+    for (const [i, l] of edit.lines.entries()) {
+      const old = l.id ? byId.get(l.id) : undefined;
+      if (old) {
+        // keep the printed unit price unless the line total changed
+        const unitPrice = old.line_cents === l.lineCents ? null : Math.round(l.lineCents / old.qty);
+        await tx.query(
+          "update receipt_lines set position = $2, name = $3, line_cents = $4, unit_price_cents = coalesce($5, unit_price_cents) where id = $1",
+          [old.id, i + 1, l.name.trim(), l.lineCents, unitPrice],
+        );
+      } else {
+        await tx.query(
+          `insert into receipt_lines (receipt_id, position, name, short, qty, unit_price_cents, line_cents, measure, unit, vat_rate)
+           values ($1, $2, $3, $3, 1, $4, $4, null, null, 21)`,
+          [receiptId, i + 1, l.name.trim(), l.lineCents],
+        );
+      }
+    }
+    const needsReview = edit.lines.reduce((a, l) => a + l.lineCents, 0) !== edit.totalCents;
+    await tx.query("update receipts set total_cents = $2, needs_review = $3 where id = $1", [receiptId, edit.totalCents, needsReview]);
+    return { needsReview };
+  });
+}
 
 /**
  * Save "Where did it go?". Recomputes the placement from the stored lines (never trusts

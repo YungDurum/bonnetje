@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createPgliteDb, type Db } from "../db/client";
 import { getJob } from "../db/jobs";
-import { createReceipt, getReceipt, saveReceiptPlacement, toPlaceLines } from "../db/receipts";
+import { createReceipt, getReceipt, saveReceiptPlacement, toPlaceLines, updateReceiptLines } from "../db/receipts";
 import { emptyChoice, wholeLineChoice, type LineChoice } from "../placement";
 import { SAMPLE_RECEIPTS } from "../samples";
 
@@ -36,6 +36,12 @@ describe("createReceipt", () => {
   it("flags a receipt whose lines don't add up to the total", async () => {
     const id = await createReceipt(db, { ...TU, totalCents: TU.totalCents + 1 });
     expect((await getReceipt(db, id))!.needsReview).toBe(true);
+  });
+  it("flags a receipt the reader marked for review, and keeps the file key", async () => {
+    const id = await createReceipt(db, { ...TU, needsReview: true, filePath: "00000000-0000-0000-0000-000000000000.jpg" });
+    const r = (await getReceipt(db, id))!;
+    expect(r.needsReview).toBe(true);
+    expect(r.filePath).toBe("00000000-0000-0000-0000-000000000000.jpg");
   });
   it("keeps an unknown measure unknown", async () => {
     const id = await createReceipt(db, SAMPLE_RECEIPTS[5]);
@@ -142,5 +148,85 @@ describe("saveReceiptPlacement", () => {
     expect(await count("material_entries")).toBe(entries);
     expect(await count("allocations")).toBe(10);
     expect((await getReceipt(db, id))!.lines.some((l) => l.placed)).toBe(false);
+  });
+});
+
+describe("updateReceiptLines", () => {
+  // the folded receipt: gypsum boards and studs visible, the screws (€10.99) hidden
+  async function folded() {
+    const id = await createReceipt(db, {
+      supplier: "Klushuis Amersfoort",
+      date: "2026-10-13",
+      source: "photo",
+      totalCents: 8265,
+      lines: [
+        { name: "Gypsum board", short: "GIPSPLAAT 260X60", qty: 6, unitPriceCents: 895, lineCents: 5370, measure: 6, unit: "pcs", vatRate: 21 },
+        { name: "Metal stud 3 m", short: "METAL STUD 50MM 3M", qty: 4, unitPriceCents: 449, lineCents: 1796, measure: 12, unit: "m", vatRate: 21 },
+      ],
+    });
+    return (await getReceipt(db, id))!;
+  }
+
+  it("adds the missing line, clears the review and keeps the existing lines as read", async () => {
+    const r = await folded();
+    expect(r.needsReview).toBe(true);
+    const res = await updateReceiptLines(db, r.id, {
+      totalCents: 8265,
+      lines: [
+        { id: r.lines[0].id, name: r.lines[0].name, lineCents: 5370 },
+        { name: "Drywall screws", lineCents: 1099 },
+        { id: r.lines[1].id, name: r.lines[1].name, lineCents: 1796 },
+      ],
+    });
+    expect(res.needsReview).toBe(false);
+    const after = (await getReceipt(db, r.id))!;
+    expect(after.needsReview).toBe(false);
+    expect(after.lines.map((l) => [l.position, l.name, l.lineCents])).toEqual([
+      [1, "Gypsum board", 5370],
+      [2, "Drywall screws", 1099],
+      [3, "Metal stud 3 m", 1796],
+    ]);
+    expect(after.lines[0]).toMatchObject({ qty: 6, unitPriceCents: 895, measure: 6, unit: "pcs" });
+    expect(after.lines[1]).toMatchObject({ qty: 1, unitPriceCents: 1099, measure: null, unit: null, vatRate: 21 });
+  });
+
+  it("can fix the total, rename, change an amount and remove a line", async () => {
+    const r = await folded();
+    const res = await updateReceiptLines(db, r.id, { totalCents: 5400, lines: [{ id: r.lines[0].id, name: " Plasterboard ", lineCents: 5400 }] });
+    expect(res.needsReview).toBe(false);
+    const after = (await getReceipt(db, r.id))!;
+    expect(after.totalCents).toBe(5400);
+    expect(after.lines).toHaveLength(1);
+    expect(after.lines[0]).toMatchObject({ name: "Plasterboard", lineCents: 5400, unitPriceCents: 900 });
+  });
+
+  it("stays flagged while the lines don't add up", async () => {
+    const r = await folded();
+    const res = await updateReceiptLines(db, r.id, {
+      totalCents: 8265,
+      lines: r.lines.map((l) => ({ id: l.id, name: l.name, lineCents: l.lineCents })),
+    });
+    expect(res.needsReview).toBe(true);
+    expect((await getReceipt(db, r.id))!.needsReview).toBe(true);
+  });
+
+  it("validates and leaves a saved receipt alone", async () => {
+    const r = await folded();
+    const line = { id: r.lines[0].id, name: "x", lineCents: 100 };
+    await expect(updateReceiptLines(db, r.id, { totalCents: 100, lines: [] })).rejects.toThrow("at least one line");
+    await expect(updateReceiptLines(db, r.id, { totalCents: 100, lines: [{ ...line, name: " " }] })).rejects.toThrow("name");
+    await expect(updateReceiptLines(db, r.id, { totalCents: 100, lines: [{ ...line, lineCents: 1.5 }] })).rejects.toThrow("amount");
+    await expect(updateReceiptLines(db, r.id, { totalCents: -1, lines: [line] })).rejects.toThrow("total");
+    await expect(updateReceiptLines(db, r.id, { totalCents: 100, lines: [line, line] })).rejects.toThrow("twice");
+    await expect(
+      updateReceiptLines(db, r.id, { totalCents: 100, lines: [{ ...line, id: "10000000-0000-0000-0000-000000000001" }] }),
+    ).rejects.toThrow("no longer exists");
+
+    const saved = await createReceipt(db, TU);
+    const t = (await getReceipt(db, saved))!;
+    await saveReceiptPlacement(db, saved, toPlaceLines(t).map((l) => wholeLineChoice(l, BAKKER)));
+    await expect(
+      updateReceiptLines(db, saved, { totalCents: TU.totalCents, lines: t.lines.map((l) => ({ id: l.id, name: l.name, lineCents: l.lineCents })) }),
+    ).rejects.toThrow("already been saved");
   });
 });
