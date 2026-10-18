@@ -10,19 +10,23 @@ const executablePath =
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  // One shared in-memory database behind the dev server: run the files one after another.
+  fullyParallel: false,
+  workers: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: "http://localhost:3100",
     viewport: { width: 390, height: 844 },
     browserName: "chromium",
     launchOptions: executablePath ? { executablePath } : {},
   },
   projects: [{ name: "mobile-chromium" }],
   webServer: {
-    command: "npm run dev",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
+    command: "npx next dev -p 3100",
+    url: "http://localhost:3100",
+    // Fresh seeded in-memory database on every run.
+    env: { BONNETJE_DB: "memory" },
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });

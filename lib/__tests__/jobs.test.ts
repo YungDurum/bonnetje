@@ -20,6 +20,7 @@ describe("listJobs (seed data)", () => {
       ["Bakker & Zn", 16006], // 13918 + 2088, no hours
     ]);
     expect(jobs.every((j) => j.status === "to_invoice")).toBe(true);
+    expect(jobs.map((j) => j.openCount)).toEqual([2, 1, 1]);
   });
 
   it("home card: materials (with markup) · labour", async () => {

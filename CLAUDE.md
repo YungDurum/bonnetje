@@ -31,6 +31,9 @@ Commands:
 Secrets live in `.env.local` (never commit it): `ANTHROPIC_API_KEY`, `MONEYBIRD_TOKEN`,
 `MONEYBIRD_ADMINISTRATION_ID`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`.
 Use a Moneybird **test administration** during development.
+`DATABASE_URL` (Supabase Postgres connection string) is read on the server. Without it the app
+runs on PGlite, an in-process Postgres with the same migrations and seed data, kept in `.data/`
+(`BONNETJE_DB=memory` starts fresh every time; the e2e tests use that).
 
 ## Domain model
 - **Job**: client, title, address, labour mode (`hour` | `day`), rate (cents), hours/days logged.

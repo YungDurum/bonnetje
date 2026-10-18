@@ -43,6 +43,8 @@ export type JobStatus = "to_invoice" | "invoiced" | "nothing";
 export type JobSummary = Job & {
   toInvoice: ToInvoice;
   status: JobStatus;
+  /** Number of material entries (receipts etc.) not invoiced yet. */
+  openCount: number;
 };
 
 export type JobDetail = JobSummary & {
@@ -163,7 +165,7 @@ function asMaterials(entries: MaterialEntry[]): Material[] {
 function summarise(job: Job, entries: MaterialEntry[], markupPct: number): JobSummary {
   const t = toInvoice(asMaterials(entries), markupPct, job.labour);
   const status: JobStatus = t.total > 0 ? "to_invoice" : entries.some((e) => e.billed) ? "invoiced" : "nothing";
-  return { ...job, toInvoice: t, status };
+  return { ...job, toInvoice: t, status, openCount: entries.filter((e) => !e.billed).length };
 }
 
 /** Home: every job with what is still to invoice, highest first. */
