@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getDb } from "@/lib/db/client";
+import { openInvoice } from "@/lib/db/invoices";
+import { listStock } from "@/lib/db/stock";
 import { getJob, type MaterialEntry } from "@/lib/db/jobs";
 import { formatDay, formatEuro } from "@/lib/format";
 import { Toast } from "../../_components/Toast";
 import { BackLink } from "../../_components/BackLink";
-import { InvoiceIcon, PlusIcon } from "../../_components/icons";
+import { InvoiceIcon } from "../../_components/icons";
+import { AddMaterial } from "./AddMaterial";
 import { InvoicedSection } from "./InvoicedSection";
 import { LabourSection } from "./LabourSection";
 import { MaterialRow, type RowData } from "./MaterialRow";
@@ -37,9 +41,20 @@ export default async function JobPage({
 }) {
   const { id } = await params;
   const { saved } = await searchParams;
-  const job = await getJob(await getDb(), id);
+  const db = await getDb();
+  const job = await getJob(db, id);
   if (!job) notFound();
+  const stock = (await listStock(db)).map((i) => ({
+    id: i.id,
+    name: i.name,
+    qty: i.qty,
+    unit: i.unit,
+    originalQty: i.originalQty,
+    valueCents: i.valueCents,
+    origin: i.origin,
+  }));
 
+  const unsent = await openInvoice(db, id);
   const openRows = job.open.map(toRow);
   const billedRows = job.billed.map(toRow);
   const t = job.toInvoice;
@@ -75,13 +90,7 @@ export default async function JobPage({
               <MaterialRow key={r.id} row={r} expandable={r.expandable} />
             ))}
             {openRows.length === 0 ? <div className="list-empty">No open materials on this job.</div> : null}
-            <div className="add-material">
-              <button type="button" className="add-btn" disabled>
-                <PlusIcon size={16} />
-                Add material
-              </button>
-              <span className="add-note">Adding materials is coming in a later step.</span>
-            </div>
+            <AddMaterial jobId={job.id} client={job.client} stock={stock} />
           </div>
         </section>
 
@@ -91,17 +100,17 @@ export default async function JobPage({
       </div>
 
       <div className="bottom-bar bottom-bar-sticky">
-        {t.total > 0 ? (
-          <button type="button" className="btn btn-primary btn-icon" disabled title="Coming soon">
+        {t.total > 0 || unsent ? (
+          <Link href={`/jobs/${job.id}/invoice`} className="btn btn-primary btn-icon">
             <InvoiceIcon />
-            Create invoice · {formatEuro(t.total)}
-          </button>
+            Create invoice · {formatEuro(unsent ? unsent.totalCents : t.total)}
+          </Link>
         ) : (
           <button type="button" className="btn btn-disabled" disabled>
             Nothing to invoice yet
           </button>
         )}
-        {t.total > 0 ? <p className="add-note center">Creating the invoice is coming in a later step.</p> : null}
+        {unsent ? <p className="job-warn">Invoice not sent</p> : null}
       </div>
     </main>
   );

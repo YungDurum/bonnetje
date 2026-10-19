@@ -81,7 +81,9 @@ test("a receipt that doesn't add up is fixed on Check receipt, then can be saved
   await expect(page.getByRole("heading", { name: /Still to place · 3/ })).toBeVisible();
   await page.getByRole("button", { name: "Put everything on one job" }).click();
   await page.getByRole("dialog", { name: "Put everything on one job" }).getByRole("button", { name: /Bakker/ }).click();
-  await expect(page.getByRole("button", { name: "Save receipt" })).toBeEnabled();
+  await page.getByRole("button", { name: "Save receipt" }).click();
+  // sent with its original photo attached: sending fails when the stored file can't be found
+  await expect(page.getByRole("status").filter({ hasText: "Saved:" })).toContainText("Receipt sent to Moneybird.");
 });
 
 test("Check receipt flags a bad amount and keeps Save off", async ({ page }) => {

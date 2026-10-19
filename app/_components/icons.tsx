@@ -104,3 +104,19 @@ export const CloseIcon = ({ size = 16 }: { size?: number }) => (
     <path d="M6 6l12 12M18 6L6 18" />
   </Icon>
 );
+export const SearchIcon = ({ size = 18 }: { size?: number }) => (
+  <Icon size={size} stroke={2.2}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.5-3.5" />
+  </Icon>
+);
+export const PencilIcon = ({ size = 20 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M4 20h4L19 9l-4-4L4 16z" />
+  </Icon>
+);
+export const TrashIcon = ({ size = 17 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+  </Icon>
+);

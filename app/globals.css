@@ -1267,6 +1267,305 @@ a.btn {
   border-top: 1px solid var(--line-soft);
 }
 
+/* ---------- stock ---------- */
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  border: 1px solid var(--field-border);
+  border-radius: 12px;
+  padding: 0 14px;
+  background: #fff;
+  color: var(--muted);
+}
+
+.search-box:focus-within {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.stock-row {
+  width: 100%;
+  min-height: 56px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  padding: 13px 14px 13px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.stock-row:last-child {
+  border-bottom: 0;
+}
+
+.chip-pick {
+  border-style: solid;
+  border-color: var(--field-border);
+}
+
+/* A chosen option is a selection, not an action: dark, like the segmented switches. */
+.chip-pick[aria-pressed="true"] {
+  background: var(--dark);
+  border-color: var(--dark);
+  color: #fff;
+}
+
+.unit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.unit-chips .chip {
+  padding: 0 14px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.left-text-sm {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.left-text-sm.left-text-over {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.sheet-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.sheet-divider {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-box {
+  background: #fff3eb;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-text {
+  margin: 0;
+  font-size: 14px;
+  color: #7c2d12;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-actions .btn {
+  flex: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-danger-outline {
+  border: 1px solid var(--red);
+  background: #fff;
+  color: var(--red);
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.sheet-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  color: var(--muted-strong);
+}
+
+.menu-btn .source-text {
+  flex: 1;
+}
+
+.menu-btn .source-sub {
+  color: var(--muted);
+}
+
+.pick-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.pick-item:last-child {
+  border-bottom: 0;
+}
+
+.pick-item .btn-outline {
+  width: auto;
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 14px;
+  flex: none;
+}
+
+a.source-btn {
+  text-decoration: none;
+}
+
+/* ---------- invoice ---------- */
+.invoice-body {
+  padding-bottom: 16px;
+}
+
+.invoice-sheet {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 6px 20px rgba(22, 25, 29, 0.08);
+}
+
+.invoice-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.invoice-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.invoice-bill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--muted-strong);
+}
+
+.invoice-bill strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.invoice-lines,
+.invoice-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+}
+
+.invoice-totals {
+  gap: 6px;
+  font-size: 14px;
+  border-top-color: var(--line);
+}
+
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.invoice-row .amount {
+  white-space: nowrap;
+}
+
+.invoice-row-muted {
+  color: var(--muted);
+}
+
+.invoice-total {
+  font-size: 18px;
+  font-weight: 800;
+  padding-top: 4px;
+}
+
+.invoice-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.job-warn {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--red);
+  text-align: center;
+}
+
+.moneybird-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.moneybird-row .btn {
+  min-height: 48px;
+}
+
+.invoice-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* ---------- reading a receipt ---------- */
 .source-btn:not(:disabled) {
   cursor: pointer;

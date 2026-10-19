@@ -72,6 +72,9 @@ runs on PGlite, an in-process Postgres with the same migrations and seed data, k
 - Stock can be added from receipts (leftovers), added manually, used on a job (all or part,
   by amount or euros), and removed (used up / thrown away, not billed).
 - A job created in Bonnetje is a contact + project in Moneybird.
+- `lib/moneybird.ts` was written without access to the Moneybird docs: endpoints and field names
+  are **unverified**. Check them against the docs and a test administration before the demo.
+  `BONNETJE_FAKE_MONEYBIRD=1` swaps in an in-memory stand-in for the e2e tests only (refused in production).
 
 ## UI rules
 - Colour roles: **orange** `#C2410C` = actions; **green** `#15803D` = done;
