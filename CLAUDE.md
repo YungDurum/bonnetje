@@ -26,6 +26,7 @@ Commands:
 - Tests: `npm test` (unit) · `npm run test:e2e` (flows)
 - Lint/types: `npm run lint` · `npm run typecheck`
 - Database: `npm run db:check` (migrations + seed in memory, no Docker) · `npm run db:reset` (local Supabase, needs the Supabase CLI + Docker)
+- Receipt reading: `npm run extract:samples` (reads `samples/*` with Claude, writes `docs/extraction-report.md`; costs one API call per sample; `-- --fake` checks the script without the API) · `npm run make:samples` (regenerates the made-up sample receipts)
 
 ## Environment
 Secrets live in `.env.local` (never commit it): `ANTHROPIC_API_KEY`, `MONEYBIRD_TOKEN`,
@@ -34,6 +35,12 @@ Use a Moneybird **test administration** during development.
 `DATABASE_URL` (Supabase Postgres connection string) is read on the server. Without it the app
 runs on PGlite, an in-process Postgres with the same migrations and seed data, kept in `.data/`
 (`BONNETJE_DB=memory` starts fresh every time; the e2e tests use that).
+Original receipt files: `receipts.file_path` is a path relative to the uploads folder
+(`receipts/<uuid>.jpg`), see `lib/files.ts`. Stored in `.data/uploads/` locally (a temp folder with
+`BONNETJE_DB=memory`), or in the Supabase Storage bucket `receipts` when `SUPABASE_URL` is set
+(server key: `SUPABASE_SERVICE_ROLE_KEY`, else `SUPABASE_ANON_KEY`).
+`BONNETJE_READER=fake` reads receipts without Claude, answering from `samples/<name>.expected.json`
+(e2e tests, demos without an API key).
 
 ## Domain model
 - **Job**: client, title, address, labour mode (`hour` | `day`), rate (cents), hours/days logged.
@@ -90,6 +97,10 @@ Send the image/PDF to the Claude API and require JSON only, validated with a sch
 `{ supplier, date, lines: [{ name, short, qty, unitPriceCents, lineTotalCents, measure: number|null, unit: "pcs"|"m"|"L"|"kg"|"boxes"|null, vatRate }], totalCents }`.
 Check that the lines add up to the total; if not, flag the receipt for review instead of guessing.
 E-invoices (UBL XML) are parsed directly, no AI needed.
+Code: `lib/extract/` (schema, checks, reader, fake reader). The model is `claude-sonnet-5-5` with a
+structured output (forced tool use isn't available on it). The user fixes a flagged receipt on
+"Check receipt"; it can be saved once its lines add up. Photos are shrunk to ~2000 px JPEG in the
+browser before upload (this also converts HEIC). Test receipts and their expected answers are in `samples/`.
 
 ## How to work in this repo
 - **Plan first** for anything bigger than a small fix; wait for approval of the plan.
