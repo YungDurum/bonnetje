@@ -1,17 +1,19 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { saveReceiptAction } from "@/app/actions";
 import { formatEuro } from "@/lib/format";
 import { computePlacement, emptyChoice, wholeLineChoice, type LineChoice, type PlaceLine } from "@/lib/placement";
 import { qtyLabel, summaryText } from "@/lib/placement-ui";
 import { Sheet } from "../../_components/Sheet";
 import { CheckIcon, ChevronRight, ListIcon } from "../../_components/icons";
+import { CheckReceipt } from "./CheckReceipt";
 import { SplitEditor, type EditorJob } from "./SplitEditor";
 
 type Line = PlaceLine & { short: string; qty: number; unitPriceCents: number };
 type Props = {
-  receipt: { id: string; totalCents: number; needsReview: boolean; lines: Line[] };
+  receipt: { id: string; totalCents: number; needsReview: boolean; lines: Line[]; file: { url: string; isPdf: boolean } | null };
   jobs: (EditorJob & { title: string })[];
 };
 
@@ -20,6 +22,8 @@ export function ReceiptPlacer({ receipt, jobs }: Props) {
   const [choices, setChoices] = useState<LineChoice[]>(() => lines.map(emptyChoice));
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [allOpen, setAllOpen] = useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
+  const router = useRouter();
   const [error, setError] = useState("");
   const [saving, startSaving] = useTransition();
 
@@ -68,9 +72,14 @@ export function ReceiptPlacer({ receipt, jobs }: Props) {
     <>
       <div className="screen-body">
         {blocked ? (
-          <div className="notice-error" role="alert">
-            <strong>Check this receipt first.</strong> The items don&apos;t add up to the total of{" "}
-            {formatEuro(receipt.totalCents)}, so it can&apos;t be saved yet.
+          <div className="notice-error stack-10" role="alert">
+            <p className="notice-text">
+              <strong>Check this receipt first.</strong> The items don&apos;t add up to the total of{" "}
+              {formatEuro(receipt.totalCents)}, so it can&apos;t be saved yet.
+            </p>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setCheckOpen(true)}>
+              Check receipt
+            </button>
           </div>
         ) : null}
 
@@ -179,6 +188,20 @@ export function ReceiptPlacer({ receipt, jobs }: Props) {
           </div>
           <p className="note">You can still change single items afterwards.</p>
         </Sheet>
+      ) : null}
+
+      {checkOpen ? (
+        <CheckReceipt
+          receiptId={receipt.id}
+          totalCents={receipt.totalCents}
+          lines={lines}
+          file={receipt.file}
+          onClose={() => setCheckOpen(false)}
+          onSaved={() => {
+            setCheckOpen(false);
+            router.refresh();
+          }}
+        />
       ) : null}
 
       {editing ? (

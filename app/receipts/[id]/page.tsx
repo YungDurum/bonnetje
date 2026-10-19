@@ -46,10 +46,13 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         </div>
       ) : (
         <ReceiptPlacer
+          // start over when "Check receipt" changed the lines or the total
+          key={[receipt.totalCents, receipt.needsReview, ...receipt.lines.map((l) => `${l.id}:${l.lineCents}`)].join("|")}
           receipt={{
             id: receipt.id,
             totalCents: receipt.totalCents,
             needsReview: receipt.needsReview,
+            file: receipt.filePath ? { url: `/api/receipts/${receipt.id}/file`, isPdf: receipt.filePath.endsWith(".pdf") } : null,
             lines: receipt.lines.map((l) => ({
               id: l.id,
               name: l.name,

@@ -1259,7 +1259,8 @@ a.btn {
 
 .sheet-foot {
   position: sticky;
-  bottom: 0;
+  /* stick to the very bottom, over the sheet's 26px padding, so nothing shows below it */
+  bottom: -26px;
   margin-bottom: -26px;
   padding: 10px 0 26px;
   background: #fff;
@@ -1428,4 +1429,67 @@ a.btn {
   .scanline {
     top: 48%;
   }
+}
+
+/* ---------- check receipt ---------- */
+.notice-text {
+  margin: 0;
+}
+
+.check-photo {
+  display: flex;
+  justify-content: center;
+  background: var(--bg);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.check-photo img {
+  max-width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.check-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.check-row-fields {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.check-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.check-amount {
+  width: 112px;
+  flex: none;
+}
+
+.check-total {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 12px;
+}
+
+.adds-up {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.adds-up-ok {
+  color: var(--green);
+}
+
+.adds-up-off {
+  color: var(--red);
 }

@@ -24,8 +24,8 @@ export default defineConfig({
   webServer: {
     command: "npx next dev -p 3100",
     url: "http://localhost:3100",
-    // Fresh seeded in-memory database on every run.
-    env: { BONNETJE_DB: "memory" },
+    // Fresh seeded in-memory database on every run; receipts are "read" from samples/*.expected.json.
+    env: { BONNETJE_DB: "memory", BONNETJE_READER: "fake" },
     reuseExistingServer: false,
     timeout: 120_000,
   },
