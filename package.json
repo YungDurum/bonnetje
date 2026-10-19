@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:reset": "supabase db reset",
-    "db:check": "vitest run lib/__tests__/schema.test.ts"
+    "db:check": "vitest run lib/__tests__/schema.test.ts",
+    "extract:samples": "tsx scripts/extract-samples.ts",
+    "make:samples": "node scripts/make-samples.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
@@ -30,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^5.0.5"
   }
